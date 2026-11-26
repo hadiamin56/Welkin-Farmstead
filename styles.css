@@ -119,6 +119,7 @@ h3{font-size:1.1rem}
 /* split + steps */
 .split{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(28px,6vw,80px);align-items:start}
 .split .sub{margin:.6rem 0 1.5rem}
+.ph.vis{margin-top:1.8rem;aspect-ratio:16/9}
 .steps{list-style:none;display:grid;gap:12px}
 .steps li{display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem 1.2rem}
 .steps b{flex:none;width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--green);display:grid;place-items:center;font-size:.9rem}
