@@ -153,3 +153,24 @@
   lb.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
   lb.addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) show(i + (d < 0 ? 1 : -1)); });
 })();
+
+/* ===== timeline progress ===== */
+(() => {
+  const tl = document.getElementById('tl');
+  if (!tl) return;
+  const items = [...tl.querySelectorAll('.tl-item')];
+  let busy = false;
+  const upd = () => {
+    const r = tl.getBoundingClientRect(), vh = innerHeight, mark = vh * .55;
+    const p = Math.max(0, Math.min(1, (mark - r.top) / r.height));
+    tl.style.setProperty('--p', (p * 100).toFixed(1));
+    items.forEach(it => {
+      const n = it.querySelector('.tl-node').getBoundingClientRect();
+      it.classList.toggle('on', n.top + n.height / 2 < mark);
+    });
+    busy = false;
+  };
+  addEventListener('scroll', () => { if (!busy) { busy = true; requestAnimationFrame(upd); } }, { passive: true });
+  addEventListener('resize', upd);
+  upd();
+})();
