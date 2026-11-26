@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Generates the static pages. Run:  python3 build.py   (needs Pillow for image sizes)"""
 import os
+import re
 from PIL import Image
 from art import SPRITE, SKYLINE, MAP_SVG
+import botanicals as bt
+from botanicals import d as deco, icon as aicon
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PH = os.path.join(ROOT, 'assets', 'photos')
@@ -120,9 +123,10 @@ def page(fname, title, desc, body, active='', sub='', og='hero.jpg', preload=Non
 </head>
 <body data-page="{active}">
 {SPRITE}
+{bt.sprite()}
 {header(active, sub)}
 <main id="main">
-{bg_layer(sub or active)}
+{pdeco(fname)}
 {body}
 </main>
 {footer()}
@@ -176,7 +180,7 @@ def features():
             ('fish', 'Farm-fresh trout', 'Raised in clean recirculating tanks, a short trip to your kitchen.'),
             ('hand', 'Straight from the farm', 'Apples, fish, sheep and milk — sold directly by the people who raise them.'),
             ('cap', 'Open to learn', 'Student farm visits: paddy harvest, threshing, winnowing and tours.')]
-    return '<div class="feats">' + ''.join(f'<div class="feat"><span class="ic">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in data) + '</div>'
+    return '<div class="feats">' + ''.join(f'<div class="feat"><span class="num">0{n}</span><span class="ic">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for n, (i, t, d) in enumerate(data, 1)) + '</div>'
 
 FAQ = [
     ('How do I order?', "Tap any Enquire or Order button — WhatsApp opens with your message ready. We reply with availability, price and how you'll receive your order."),
@@ -203,35 +207,6 @@ def gallery_grid():
 
 # ---------- background graphics ----------
 VB = {'apple': (100, 100), 'fish': (140, 80), 'sheep': (120, 100), 'wheat': (80, 120), 'cherry': (100, 100), 'walnut': (100, 100), 'tree': (100, 120), 'branch': (160, 100)}
-THEMES = {
-    'home': ['tree', 'apple', 'fish', 'sheep', 'branch', 'cherry', 'wheat', 'fish', 'apple', 'tree'],
-    'shop': ['apple', 'fish', 'sheep', 'cherry', 'walnut', 'branch'],
-    'orchard': ['apple', 'tree', 'cherry', 'branch', 'apple', 'walnut'],
-    'aqua': ['fish', 'fish', 'fish', 'fish', 'fish', 'fish'],
-    'livestock': ['sheep', 'wheat', 'tree', 'sheep', 'wheat', 'sheep'],
-    'visits': ['wheat', 'tree', 'apple', 'wheat', 'branch', 'wheat'],
-    'seasons': ['cherry', 'apple', 'walnut', 'wheat', 'branch', 'fish'],
-    'gallery': ['apple', 'fish', 'sheep', 'cherry', 'tree', 'wheat'],
-    'careers': ['wheat', 'tree', 'branch', 'apple', 'wheat', 'sheep'],
-    'contact': ['branch', 'apple', 'tree', 'cherry', 'fish', 'sheep'],
-}
-def bg_layer(theme):
-    names = THEMES.get(theme)
-    if not names:
-        return ''
-    out = []
-    n = len(names)
-    for i, nm in enumerate(names):
-        w, h = VB[nm]
-        size = 96 + (i * 37) % 70
-        left = (2 + (i * 7) % 6) if i % 2 == 0 else None
-        top = 4 + i * (88 / n)
-        side = f'left:{left}%' if left is not None else f'right:{2 + (i * 5) % 6}%'
-        rot = (-18, 12, -8, 20, -24, 8, 16, -12, 22, -6)[i % 10]
-        dur = 8 + (i * 3) % 7
-        out.append(f'<svg class="d" style="top:{top:.1f}%;{side};width:{size}px;aspect-ratio:{w}/{h};--r:{rot}deg;animation-duration:{dur}s;animation-delay:-{i * 1.7:.1f}s" viewBox="0 0 {w} {h}"><use href="#d-{nm}"/></svg>')
-    return '<div class="bgd" aria-hidden="true">' + ''.join(out) + '</div>'
-
 def strip():
     words = ['Apples', 'Rainbow Trout', 'Ruby Nectarines', 'Cherries', 'Apricots', 'Kiwi', 'Walnuts', 'Pears', 'Dumba &amp; Merino', 'Fresh Milk']
     icons = ['apple', 'fish', 'apple', 'cherry', 'apple', 'apple', 'walnut', 'apple', 'sheep', 'wheat']
@@ -239,23 +214,35 @@ def strip():
         return ''.join(f'<span><svg viewBox="0 0 {VB[ic][0]} {VB[ic][1]}" aria-hidden="true"><use href="#d-{ic}"/></svg>{w}</span>' for w, ic in zip(words, icons))
     return f'<div class="strip" aria-hidden="true"><div class="stk">{one()}{one()}</div></div>'
 
-def journey():
-    chapters = [
-        ('tree', 'orchard.jpg', 'Chapter 1', 'The first trees', 'It began with high-density apple orchards in Sopore — closely planted rows built for early, generous fruit.'),
-        ('cherry', 'harvest.jpg', 'Chapter 2', 'More to harvest', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts joined the apples.'),
-        ('sheep', 'livestock.jpg', 'Chapter 3', 'A herd on the green', 'Dumba and Merino sheep, bulls and milk — the farm\'s animals, raised on open pasture.'),
-        ('fish', 'tanks-wide.jpg', 'Chapter 4', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
-        ('wheat', 'paddy.jpg', 'Chapter 5', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
-        ('apple', 'hero.jpg', 'Chapter 6', 'Growing together', 'A growing team, Qurbani bookings, fresh orders — and the next chapter still to be written.'),
+def journey_section():
+    stages = [
+        ('tree', 'apple-branch', 'orchard.jpg', 'Stage 1', 'Orchards take root', 'High-density apple blocks in Sopore — closely planted rows built for early, generous fruit.'),
+        ('apple', 'cherries', 'harvest.jpg', 'Stage 2', 'A fuller basket', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts join the apples.'),
+        ('sheep', 'tree', 'livestock.jpg', 'Stage 3', 'A herd on the green', 'Dumba and Merino sheep, bulls and fresh milk — raised on open pasture, with Qurbani bookings each Eid-ul-Adha.'),
+        ('fish', 'waves', 'tanks-wide.jpg', 'Stage 4', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
+        ('wheat', 'sprig', 'paddy.jpg', 'Stage 5', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
+        ('sprig', 'apple-branch', 'hero.jpg', 'Stage 6', 'Growing together', 'A growing team across operations, sales, logistics and more — and the next stage still to be written.'),
     ]
     items = ''
-    for i, (ic, f, tag, t, d) in enumerate(chapters):
+    for i, (pin, bit, f, tag, t, dsc) in enumerate(stages):
         side = 'l' if i % 2 == 0 else 'r'
-        w, h = VB[ic]
-        items += (f'<li class="tl-item {side}"><div class="tl-card">{ph(f, "", "", t, "(min-width:980px) 440px, 90vw")}'
-                  f'<div class="tl-txt"><span class="tl-tag">{tag}</span><h3>{t}</h3><p>{d}</p></div></div>'
-                  f'<span class="tl-node"><svg viewBox="0 0 {w} {h}" aria-hidden="true"><use href="#d-{ic}"/></svg></span></li>')
-    return f'<div class="tl" id="tl"><span class="tl-line"><i></i></span><ol>{items}</ol></div>'
+        items += (f'<li class="stop {side}"><div class="bit">{aicon(bit)}</div>'
+                  f'<div class="scard">{ph(f, "", "", t, "(min-width:980px) 440px, 90vw")}<div class="stxt"><span class="stage">{tag}</span><h3>{t}</h3><p>{dsc}</p></div></div>'
+                  f'<span class="pin">{aicon(pin)}</span></li>')
+    mtn = ('<svg class="mtn" viewBox="0 0 1440 260" preserveAspectRatio="none" aria-hidden="true">'
+           '<path fill="#d9e6dc" d="M0 260V170L130 90 230 150 360 60 480 140 610 80 760 170 900 70 1040 150 1180 100 1320 160 1440 120V260Z"/>'
+           '<path fill="#c6dbc9" d="M0 260V205L160 145 300 192 470 124 640 202 820 152 1000 212 1180 164 1320 202 1440 182V260Z"/></svg>')
+    hills = ('<svg class="hills" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">'
+             '<path fill="#dcebcf" d="M0 100C240 40 480 50 720 90S1200 130 1440 70V220H0Z"/>'
+             '<path fill="#c8e0b8" d="M0 140C300 90 600 120 840 150S1260 160 1440 120V220H0Z"/>'
+             '<path fill="#f3efe3" d="M0 182C320 152 640 172 900 186S1300 180 1440 170V220H0Z"/></svg>')
+    scene = (f'<div class="deco-wrap jscene"><span class="sun"></span>{mtn}{deco("cloud","tl",150,at="top:70px;left:8%")}{deco("cloud","tr",120,at="top:120px;right:14%",op=.2)}{hills}'
+             f'{deco("tree","bl",90,at="bottom:70px;left:6%",op=.3)}{deco("tree","bl",64,at="bottom:84px;left:11%",op=.25)}{deco("tree","br",84,at="bottom:72px;right:8%",op=.3)}</div>')
+    road = ('<svg class="road" aria-hidden="true"><path class="rb"/><path class="rd"/><path class="rc"/><path class="rp"/>'
+            '<g class="trav"><circle r="15"/><circle r="6"/></g></svg>')
+    head = sh('How Welkin grows', 'Follow the road through the farm', 'Six stages of one farm growing in Sopore — from the orchard to the tanks and fields. Scroll to travel the road.')
+    return (f'<section class="sec journey" id="journey">{scene}<div class="wrap">{head}'
+            f'<div class="jr" id="jr">{road}<ol class="stops">{items}</ol></div></div></section>')
 
 # ---------- components ----------
 def phead(crumbs, h1, lead, banner_file, banner_alt, ctas=''):
@@ -271,11 +258,37 @@ def phead(crumbs, h1, lead, banner_file, banner_alt, ctas=''):
 def sec(inner, tint=False, id=''):
     return f'<section class="sec{" tint" if tint else ""}"{f" id={id}" if id else ""}><div class="wrap">{inner}</div></section>'
 
+def style(html, kind='', decos=''):
+    # Give an existing section a colour kind (tint/dark/aqua) and/or background drawings.
+    m = re.search(r'<section class="sec([^"]*)"([^>]*)>', html)
+    cls = m.group(1).split()
+    if kind:
+        cls = [c for c in cls if c not in ('tint', 'dark', 'aqua')] + [kind]
+    new = f'<section class="sec {" ".join(cls)}"{m.group(2)}>' + (f'<div class="deco-wrap" aria-hidden="true">{decos}</div>' if decos else '')
+    return html[:m.start()] + new + html[m.end():]
+
+PAGE_DECOS = {
+    'shop.html': deco('cherries', 'tr', 150, 8, at='top:90px;right:5%') + deco('sprig', 'tr', 170, 18, at='top:300px;right:-30px'),
+    'orchard.html': deco('apple-branch', 'tr', 470, at='top:10px;right:-40px') + deco('sprig', 'tl', 150, -12, at='top:420px;left:-30px'),
+    'aquaculture.html': deco('fish', 'tr', 270, 3, cls='swim', at='top:50px;right:70px') + deco('fish', 'tr', 150, 0, True, 'swim s2', at='top:200px;right:380px') + deco('waves', 'tr', 330, at='top:330px;right:10px'),
+    'livestock.html': deco('sheep', 'tr', 250, at='top:60px;right:60px') + deco('wheat', 'tr', 90, 4, at='top:20px;right:360px'),
+    'visits.html': deco('wheat', 'tr', 110, 3, at='top:30px;right:50px') + deco('wheat', 'tr', 80, -9, at='top:90px;right:170px') + deco('sprig', 'tl', 140, -14, at='top:380px;left:-30px'),
+    'seasons.html': deco('sprig', 'tr', 190, 14, at='top:40px;right:20px') + deco('cherries', 'tl', 140, -6, at='top:420px;left:-20px'),
+    'gallery.html': deco('tree', 'tr', 180, at='top:50px;right:70px') + deco('sprig', 'tr', 150, 20, at='top:260px;right:-20px'),
+    'careers.html': deco('wheat', 'tr', 120, 4, at='top:50px;right:90px') + deco('tree', 'tr', 150, at='top:220px;right:260px'),
+    'contact.html': deco('sprig', 'tr', 200, 12, at='top:30px;right:20px') + deco('apple-branch', 'tl', 400, -4, at='top:640px;left:-70px'),
+    '404.html': deco('sprig', 'tr', 220, 10, at='top:40px;right:60px') + deco('apple-branch', 'tl', 360, at='top:300px;left:-40px'),
+}
+
+def pdeco(fname):
+    d = PAGE_DECOS.get(fname)
+    return f'<div class="pdeco deco-wrap" aria-hidden="true">{d}</div>' if d else ''
+
 def sh(eyebrow, h2, sub=''):
     return f'<header class="sh"><p class="eyebrow">{eyebrow}</p><h2>{h2}</h2>{f"<p class=sub>{sub}</p>" if sub else ""}</header>'
 
 def band(h, p, btn):
-    return f'<section class="sec"><div class="wrap"><div class="band"><div><h2>{h}</h2><p>{p}</p></div>{btn}</div></div></section>'
+    return f'<section class="sec"><div class="wrap"><div class="band">{deco("sprig", "tr", 150, 20, at="top:-20px;right:150px")}{deco("apple-branch", "bl", 260, at="bottom:-40px;left:-40px")}<div><h2>{h}</h2><p>{p}</p></div>{btn}</div></div></section>'
 
 PRODUCTS = [
     ('fruit', 'orchard.jpg', 'Apples', 'From our high-density orchard blocks.', "Salaam Welkin Farmstead! I'd like to enquire about apples — availability and rates, please."),
@@ -317,13 +330,15 @@ ENQ_BAND = band('Ready to order?', 'Message us on WhatsApp — tell us what you 
                 wabtn("Salaam Welkin Farmstead! I'd like to place an order.", 'Order on WhatsApp', 'btn btn-light'))
 
 # ---------- pages ----------
+HERO_DECO = deco('sprig', 'tl', 190, -10, at='top:20px;left:-30px') + deco('apple-branch', 'br', 430, at='bottom:-30px;right:-50px') + '<span class="blob b1"></span><span class="blob b2"></span>'
+
 def home():
-    hero = f'''<section class="hero">
+    hero = f'''<section class="hero"><div class="deco-wrap" aria-hidden="true">{HERO_DECO}</div>
   <div class="wrap hero-in">
     <div class="hero-copy">
       <p class="pill"><span></span> Sopore, Kashmir · 193201</p>
       <h1>Where goodness grows.</h1>
-      <p class="lead">Welkin Farmstead is a family-run agricultural and aquaculture farm. High-density apple orchards, farm-fresh rainbow trout, sheep, bulls and milk — raised in Sopore, sold directly by us.</p>
+      <p class="lead">Welkin Farmstead is an agricultural and aquaculture farm. High-density apple orchards, farm-fresh rainbow trout, sheep, bulls and milk — raised in Sopore, sold directly by us.</p>
       <div class="actions"><a class="btn btn-green" href="shop.html">Browse the farm shop</a>{wabtn("Salaam Welkin Farmstead! I'd like to know more about your farm products.", 'Chat on WhatsApp', 'btn btn-ghost')}</div>
     </div>
     <div class="collage">
@@ -342,15 +357,17 @@ def home():
     featured = sec(sh('Farm shop', 'Fresh from the farm', 'A few things we\'re known for. See everything in the shop.') +
                    '<div class="cards">' + ''.join(card(PRODUCTS[i]) for i in (0, 1, 4, 5)) + '</div>' +
                    '<p class="more"><a class="btn btn-ghost" href="shop.html">See all products →</a></p>')
-    why = sec(sh('Why Welkin', 'Goodness you can trace') + features())
-    story = sec(sh('The Welkin journey', 'From the first tree to the table', 'Six chapters of one farm growing in Sopore.') + journey(), tint=True)
-    farm = sec(sh('Our farm', 'Four ways we farm') + tiles(), tint=True)
+    why = style(sec(sh('Why Welkin', 'Goodness you can <em>trace.</em>') + features()), 'dark', deco('sprig', 'tl', 280, -6, at='top:-20px;left:-40px') + deco('apple-branch', 'br', 520, at='bottom:-60px;right:-60px'))
+    story = journey_section()
+    farm = style(sec(sh('Our farm', 'Four ways we farm') + tiles(), tint=True), 'tint', deco('wheat', 'br', 190, 6, at='bottom:-10px;right:2%') + deco('cherries', 'tr', 130, 10, at='top:30px;right:5%'))
     season = sec(sh('Seasons', "In season right now", 'Typical Kashmir timing — message us for exact availability.') +
                  '<ul class="slist" id="slist" aria-live="polite"></ul><p class="more"><a class="btn btn-ghost" href="seasons.html">Full season calendar →</a></p>')
     visit = sec(split(
         '<p class="eyebrow">Farm visits</p><h2>A day in the fields</h2><p class="sub">Schools and colleges are welcome to spend a day with us — harvesting, threshing, winnowing and touring the orchard, herd and trout tanks.</p><p><a class="btn btn-green" href="visits.html">Plan a visit</a></p>',
         ph('paddy.jpg', 'Students on a Welkin farm visit', '', None, '(min-width:980px) 560px, 100vw')), tint=True)
     find = sec(findus())
+    season = style(season, '', deco('sprig', 'tr', 200, 14, at='top:10px;right:0'))
+    visit = style(visit, 'tint', deco('tree', 'bl', 150, at='bottom:10px;left:2%') + deco('wheat', 'tr', 110, 8, at='top:20px;right:3%'))
     return hero + strip() + featured + why + story + farm + season + visit + find + follow_band() + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
 
 def shop():
@@ -362,7 +379,7 @@ def shop():
         ('Pick what you need', 'Choose products from the shop, or just tell us what you\'re after.'),
         ('Message us', 'Tap Enquire — WhatsApp opens with your message ready to send.'),
         ('We confirm', 'We reply with availability, price and how you\'ll receive your order.')]), tint=True)
-    return body + how + ENQ_BAND
+    return body + style(how, 'tint', deco('cherries', 'br', 170, 8, at='bottom:-10px;right:4%') + deco('sprig', 'tl', 170, -16, at='top:-10px;left:-20px')) + ENQ_BAND
 
 def orchard():
     crops = [('harvest.jpg', 'Apples &amp; pears', 'Our flagship — apples from high-density blocks, plus pears.'),
@@ -378,7 +395,7 @@ def orchard():
     body = (phead([('Home', 'index.html'), ('Our farm', None), ('Orchard', None)], 'The Welkin orchard',
                   'High-density apple orchards, plus pears, Ruby Nectarines, apricots, cherries, kiwi and walnuts — grown in Sopore.',
                   'orchard.jpg', 'Welkin orchard in Sopore', wabtn("Salaam Welkin Farmstead! I'd like to order fruit from your orchard. Please share what's available and the rates.", 'Order fruit') + '<a class="btn btn-ghost" href="seasons.html">When is it ready?</a>')
-            + sec(sh('What we grow', 'From the orchard') + grid) + why
+            + sec(sh('What we grow', 'From the orchard') + grid) + style(why, 'dark', deco('sprig', 'tl', 260, -8, at='top:-20px;left:-40px') + deco('apple-branch', 'br', 480, at='bottom:-50px;right:-60px'))
             + sec(sh('Also', 'Seedlings for your garden', 'We raise vegetable and flower seedlings too. Message us to ask what\'s ready.') + '', False)
             + ENQ_BAND)
     return body
@@ -396,7 +413,7 @@ def aqua():
     body = (phead([('Home', 'index.html'), ('Our farm', None), ('Aquaculture', None)], 'Welkin Aquaculture',
                   'Farm-fresh rainbow trout raised in a Recirculating Aquaculture System in Sopore.',
                   'tanks-wide.jpg', 'Welkin Aquaculture trout tanks', wabtn("Salaam Welkin Aquaculture! I'd like to order fresh rainbow trout. Please share availability and rates.", 'Order fresh trout'))
-            + s1 + s2 + ENQ_BAND)
+            + s1 + style(s2, 'aqua', deco('fish', 'tr', 220, 2, cls='swim', at='top:40px;right:6%') + deco('fish', 'tl', 150, 0, True, 'swim s2', at='top:120px;left:3%') + deco('waves', 'br', 460, at='bottom:10px;right:-20px') + deco('waves', 'bl', 360, at='bottom:60px;left:-20px')) + ENQ_BAND)
     return body
 
 def livestock():
@@ -410,7 +427,7 @@ def livestock():
                   'Healthy sheep and bulls raised on the farm, fresh milk, and early Qurbani bookings.',
                   'livestock.jpg', 'Sheep and cattle at Welkin Farmstead', wabtn("Salaam Welkin Farmstead! I'd like to book an animal for Eid-ul-Adha Qurbani. Please share breeds, weights and rates.", 'Book Qurbani'))
             + sec(sh('Our animals', 'Breeds we raise') + grid + '<p class="also">We also supply <b>fresh milk</b> from our herd — message us for details.</p>')
-            + q + ENQ_BAND)
+            + style(q, 'tint', deco('wheat', 'br', 150, 5, at='bottom:0;right:3%') + deco('sheep', 'tl', 190, at='top:20px;left:3%')) + ENQ_BAND)
     return body
 
 def visits():
@@ -428,7 +445,7 @@ def visits():
     return (phead([('Home', 'index.html'), ('Our farm', None), ('Farm visits', None)], 'Farm visits for students',
                   'Hands-on field days at Welkin Farmstead — paddy harvesting, threshing, winnowing and farm tours.',
                   'paddy.jpg', 'Students on a farm visit at Welkin Farmstead', wabtn("Salaam Welkin Farmstead! We'd like to arrange an educational farm visit for students. Please share dates and details.", 'Request a visit'))
-            + s1 + s2 + form)
+            + s1 + style(s2, 'dark', deco('wheat', 'tl', 150, -4, at='top:10px;left:2%') + deco('wheat', 'tr', 150, 6, True, at='top:10px;right:2%') + deco('sprig', 'br', 220, 10, at='bottom:-30px;right:20%')) + form)
 
 def seasons():
     return (sec('<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> <span>/</span> <b>Seasons</b></nav><h1 class="ph1">What\'s good right now</h1><p class="lead">Choose a month to see what the valley is offering. Timings are typical for Kashmir and move with the weather — message us for exact availability.</p>'
@@ -459,7 +476,7 @@ def contact():
 <button class="btn btn-green wide" type="submit">Send on WhatsApp</button></form>'''))
 
 def contact_extra():
-    return sec(findus(), tint=True) + sec(sh('FAQ', 'Good to know') + faq())
+    return style(sec(findus(), tint=True), 'tint', deco('sprig', 'tr', 170, 16, at='top:10px;right:1%') + deco('cherries', 'bl', 130, -8, at='bottom:10px;left:2%')) + sec(sh('FAQ', 'Good to know') + faq())
 
 def notfound():
     return sec('<div class="nf"><p class="eyebrow">404</p><h1 class="ph1">This page wandered off.</h1><p class="lead">The page you\'re looking for isn\'t here. Let\'s get you back to the farm.</p><p class="actions"><a class="btn btn-green" href="index.html">Go home</a><a class="btn btn-ghost" href="shop.html">Farm shop</a></p></div>')
