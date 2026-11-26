@@ -203,53 +203,83 @@
   });
 })();
 
-/* ===== journey: road + swipeable stage cards ===== */
+/* ===== journey: stepper + auto-playing stage cards ===== */
 (() => {
   const jt = document.getElementById('jt');
   if (!jt) return;
-  const $$ = (s, c = jt) => [...c.querySelectorAll(s)];
-  const prog = jt.querySelector('.jp'), sl = document.getElementById('jslides'), cnt = document.getElementById('jcount');
+  const $ = (s, c = jt) => c.querySelector(s), $$ = (s, c = jt) => [...c.querySelectorAll(s)];
+  const sl = $('#jslides'), cnt = $('#jcount'), fill = $('.jfill'), tick = $('.jtick'), playBtn = $('#jplay');
   const nodes = $$('.jn'), slides = $$('.jslide'), n = slides.length;
-  let cur = 0, lens = [], L = prog.getTotalLength(), lock = false;
+  const DWELL = 6000;
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cur = 0, playing = !still, timer = null, lock = false, visible = false, hover = false;
 
-  const place = () => {
-    L = prog.getTotalLength();
-    lens = nodes.map((_, i) => L * (.05 + .9 * i / (n - 1)));
-    nodes.forEach((nd, i) => {
-      const p = prog.getPointAtLength(lens[i]);
-      nd.style.left = (p.x / 1000 * 100) + '%';
-      nd.style.top = (p.y / 120 * 100) + '%';
-    });
-    prog.style.strokeDasharray = L;
-    paint();
-  };
+  const seg = 100 / (n - 1);
   const paint = () => {
-    nodes.forEach((nd, i) => { nd.classList.toggle('on', i === cur); nd.classList.toggle('done', i < cur); });
-    prog.style.strokeDashoffset = L - lens[cur];
+    nodes.forEach((nd, i) => { nd.classList.toggle('on', i === cur); nd.classList.toggle('done', i < cur); nd.setAttribute('aria-current', i === cur ? 'step' : 'false'); });
+    slides.forEach((s, i) => s.classList.toggle('act', i === cur));
+    fill.style.width = (cur * seg) + '%';
     cnt.textContent = `${cur + 1} / ${n}`;
   };
   const stride = () => (slides[1] ? slides[1].offsetLeft - slides[0].offsetLeft : sl.clientWidth);
+  const runTick = () => {
+    tick.classList.remove('run');
+    tick.style.left = (cur * seg) + '%';
+    tick.style.setProperty('--seg', seg + '%');
+    tick.style.setProperty('--dwell', DWELL + 'ms');
+    if (playing && cur < n - 1) { void tick.offsetWidth; tick.classList.add('run'); }
+  };
+  const schedule = () => {
+    clearTimeout(timer);
+    runTick();
+    if (playing && visible && !hover) timer = setTimeout(() => go(cur === n - 1 ? 0 : cur + 1), DWELL);
+  };
   const go = i => {
-    cur = Math.max(0, Math.min(n - 1, i));
+    cur = (i + n) % n;
     paint();
     lock = true;
     sl.scrollTo({ left: cur * stride(), behavior: 'smooth' });
-    setTimeout(() => { lock = false; }, 600);
+    setTimeout(() => { lock = false; }, 650);
+    schedule();
   };
-  sl.addEventListener('scroll', () => {
-    if (lock) return;
-    const i = Math.round(sl.scrollLeft / stride());
-    if (i !== cur && i >= 0 && i < n) { cur = i; paint(); }
-  }, { passive: true });
+  const setPlaying = p => {
+    playing = p;
+    playBtn.dataset.state = p ? 'play' : 'pause';
+    playBtn.setAttribute('aria-label', p ? 'Pause journey' : 'Play journey');
+    schedule();
+  };
+
   nodes.forEach((nd, i) => nd.addEventListener('click', () => go(i)));
-  document.getElementById('jprev').addEventListener('click', () => go(cur - 1));
-  document.getElementById('jnext').addEventListener('click', () => go(cur + 1));
+  $('#jprev').addEventListener('click', () => go(cur - 1));
+  $('#jnext').addEventListener('click', () => go(cur + 1));
+  playBtn.addEventListener('click', () => setPlaying(!playing));
   sl.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') { e.preventDefault(); go(cur + 1); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
   });
-  addEventListener('resize', () => { place(); sl.scrollLeft = cur * stride(); });
-  place();
+  // manual swipe: follow the scroll position, then restart the timer
+  let st = null;
+  sl.addEventListener('scroll', () => {
+    if (lock) return;
+    clearTimeout(st);
+    st = setTimeout(() => {
+      const i = Math.round(sl.scrollLeft / stride());
+      if (i !== cur && i >= 0 && i < n) { cur = i; paint(); }
+      schedule();
+    }, 140);
+  }, { passive: true });
+  sl.addEventListener('touchstart', () => clearTimeout(timer), { passive: true });
+  jt.addEventListener('mouseenter', () => { hover = true; clearTimeout(timer); tick.style.animationPlayState = 'paused'; });
+  jt.addEventListener('mouseleave', () => { hover = false; tick.style.animationPlayState = ''; schedule(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timer); else schedule(); });
+  addEventListener('resize', () => { sl.scrollLeft = cur * stride(); });
+
+  playBtn.dataset.state = playing ? 'play' : 'pause';
+  if (!playing) playBtn.setAttribute('aria-label', 'Play journey');
+  paint();
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); schedule(); }, { threshold: .35 }).observe(jt);
+  } else { visible = true; schedule(); }
 })();
 
 /* ===== app shell: bottom sheets + back button ===== */
