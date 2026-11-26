@@ -3,7 +3,7 @@
 import os
 import re
 from PIL import Image
-from art import SPRITE, SKYLINE, MAP_SVG
+from art import SPRITE, SKYLINE
 import botanicals as bt
 from botanicals import d as deco, icon as aicon
 
@@ -58,7 +58,7 @@ FARM = [
     ('visits', 'visits.html', 'Farm visits', 'Student days in the fields'),
 ]
 
-def header(active, sub):
+def header(active, sub, title=''):
     items = ''
     for key, href, label in NAV:
         if key == 'farm':
@@ -74,13 +74,15 @@ def header(active, sub):
 <header class="nav" id="nav">
   <div class="wrap nav-in">
     <a href="index.html" class="brand"><img src="assets/logo.png" alt="" width="40" height="40"><span>Welkin Farmstead</span></a>
+    <a class="ab-back" href="index.html" aria-label="Back">{AB_BACK}</a><span class="ab-title">{title}</span>
     <nav class="links" id="links" aria-label="Main">{items}</nav>
     <a class="btn btn-sm btn-green nav-cta" href="contact.html">Order</a>
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="links"><i></i><i></i></button>
+    <a class="ab-act" href="tel:+917006901374" aria-label="Call Welkin Farmstead">{AB_CALL}</a>
   </div>
 </header>'''
 
-def footer():
+def footer(active='', sub=''):
     farm = ''.join(f'<a href="{h}">{l}</a>' for _, h, l, _ in FARM)
     return SKYLINE + f'''<footer class="footer">
   <div class="wrap fgrid">
@@ -91,7 +93,7 @@ def footer():
   </div>
   <div class="wrap fcopy">© <span id="yr">2026</span> Welkin Farmstead · Managed by Waseem Anayat Hajini</div>
 </footer>
-<div class="mbar"><a class="m-call" href="tel:+917006901374">Call</a><a class="m-wa" href="{wa("Salaam Welkin Farmstead! I'd like to know more.")}" target="_blank" rel="noopener">WhatsApp</a></div>
+{appnav(active, sub)}
 <script src="script.js"></script>'''
 
 LD = '''<script type="application/ld+json">{"@context":"https://schema.org","@type":"Farm","name":"Welkin Farmstead","slogan":"Where Goodness Grows","telephone":"+91-7006901374","email":"waseemhajini86@gmail.com","image":"assets/photos/hero.jpg","address":{"@type":"PostalAddress","addressLocality":"Sopore","addressRegion":"Jammu & Kashmir","postalCode":"193201","addressCountry":"IN"},"sameAs":["https://www.instagram.com/welkinfarmstead/","https://www.facebook.com/welkinfarmstead/"]}</script>'''
@@ -119,17 +121,18 @@ def page(fname, title, desc, body, active='', sub='', og='hero.jpg', preload=Non
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 {pl}
 <link rel="stylesheet" href="styles.css">
+{MAPHEAD if "data-locmap" in body else ""}
 {LD}
 </head>
 <body data-page="{active}">
 {SPRITE}
 {bt.sprite()}
-{header(active, sub)}
+{header(active, sub, '' if fname == 'index.html' else title)}
 <main id="main">
 {pdeco(fname)}
 {body}
 </main>
-{footer()}
+{footer(active, sub)}
 </body>
 </html>
 '''
@@ -160,6 +163,10 @@ SOCIAL = (f'<a href="https://www.instagram.com/welkinfarmstead/" target="_blank"
           f'<a href="{wa("Salaam Welkin Farmstead! I\'d like to know more.")}" target="_blank" rel="noopener" aria-label="WhatsApp">{ICON["wa"]}</a>')
 
 MAPQ = 'Welkin+Farmstead,+Sopore,+Kashmir+193201'
+AB_BACK = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>'
+AB_CALL = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>'
+MAPHEAD = '<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">\n<script src="assets/vendor/leaflet/leaflet.js" defer></script>'
+
 def findus(compact=False):
     return f'''<div class="map-grid">
   <div class="map-info">
@@ -170,9 +177,15 @@ def findus(compact=False):
       <li>{ICON["phone"]}<div><b>Call / WhatsApp</b><a href="tel:+917006901374">70069 01374</a></div></li>
       <li>{ICON["mail"]}<div><b>Email</b><a href="mailto:waseemhajini86@gmail.com">waseemhajini86@gmail.com</a></div></li>
     </ul>
-    <div class="actions"><a class="btn btn-green" href="https://www.google.com/maps/dir/?api=1&destination={MAPQ}" target="_blank" rel="noopener">Get directions</a><a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={MAPQ}" target="_blank" rel="noopener">Open in Maps</a></div>
+    <div class="actions"><a class="btn btn-green" href="https://www.google.com/maps/dir/?api=1&destination={MAPQ}" target="_blank" rel="noopener">Get directions</a><a class="btn btn-ghost" href="https://www.openstreetmap.org/search?query=Sopore%2C%20Kashmir" target="_blank" rel="noopener">Open full map</a></div>
   </div>
-  <div class="map">{MAP_SVG}<div class="legend"><span><i class="lg r"></i>Welkin Farmstead</span><span><i class="lg t"></i>Welkin Aquaculture</span><span><i class="lg g"></i>Orchards</span><span><i class="lg b"></i>Jhelum river</span></div></div>
+  <div class="locmap" data-locmap>
+    <div class="lm-head"><span>Find us · Geographic map</span><span class="osm"><i></i>OpenStreetMap</span></div>
+    <div class="lm-wrap"><div class="lm-map" id="locmap" role="region" aria-label="Map showing Welkin Farmstead in Sopore, Kashmir"></div><div class="lm-chip"><span>Kashmir</span><span>2 sites</span></div></div>
+    <noscript><p class="lm-ns">Enable JavaScript to see the interactive map, or <a href="https://www.openstreetmap.org/search?query=Sopore%2C%20Kashmir" target="_blank" rel="noopener">open it on OpenStreetMap</a>.</p></noscript>
+    <div class="lm-tabs" role="tablist" aria-label="Locations"><button role="tab" class="on" aria-selected="true" data-i="0"><b>1</b>Welkin Farmstead</button><button role="tab" aria-selected="false" data-i="1"><b>2</b>Welkin Aquaculture</button></div>
+    <div class="lm-detail" aria-live="polite"><h3 id="lmName">Welkin Farmstead</h3><p id="lmText"></p></div>
+  </div>
 </div>'''
 
 def features():
@@ -216,33 +229,79 @@ def strip():
 
 def journey_section():
     stages = [
-        ('tree', 'apple-branch', 'orchard.jpg', 'Stage 1', 'Orchards take root', 'High-density apple blocks in Sopore — closely planted rows built for early, generous fruit.'),
-        ('apple', 'cherries', 'harvest.jpg', 'Stage 2', 'A fuller basket', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts join the apples.'),
-        ('sheep', 'tree', 'livestock.jpg', 'Stage 3', 'A herd on the green', 'Dumba and Merino sheep, bulls and fresh milk — raised on open pasture, with Qurbani bookings each Eid-ul-Adha.'),
-        ('fish', 'waves', 'tanks-wide.jpg', 'Stage 4', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
-        ('wheat', 'sprig', 'paddy.jpg', 'Stage 5', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
-        ('sprig', 'apple-branch', 'hero.jpg', 'Stage 6', 'Growing together', 'A growing team across operations, sales, logistics and more — and the next stage still to be written.'),
+        ('tree', 'orchard.jpg', 'Orchards take root', 'High-density apple blocks in Sopore — closely planted rows built for early, generous fruit.'),
+        ('apple', 'harvest.jpg', 'A fuller basket', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts join the apples.'),
+        ('sheep', 'livestock.jpg', 'A herd on the green', 'Dumba and Merino sheep, bulls and fresh milk — raised on open pasture, with Qurbani bookings each Eid-ul-Adha.'),
+        ('fish', 'tanks-wide.jpg', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
+        ('wheat', 'paddy.jpg', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
+        ('sprig', 'hero.jpg', 'Growing together', 'A growing team across operations, sales, logistics and more — and the next stage still to be written.'),
     ]
-    items = ''
-    for i, (pin, bit, f, tag, t, dsc) in enumerate(stages):
-        side = 'l' if i % 2 == 0 else 'r'
-        items += (f'<li class="stop {side}"><div class="bit">{aicon(bit)}</div>'
-                  f'<div class="scard">{ph(f, "", "", t, "(min-width:980px) 440px, 90vw")}<div class="stxt"><span class="stage">{tag}</span><h3>{t}</h3><p>{dsc}</p></div></div>'
-                  f'<span class="pin">{aicon(pin)}</span></li>')
-    mtn = ('<svg class="mtn" viewBox="0 0 1440 260" preserveAspectRatio="none" aria-hidden="true">'
-           '<path fill="#d9e6dc" d="M0 260V170L130 90 230 150 360 60 480 140 610 80 760 170 900 70 1040 150 1180 100 1320 160 1440 120V260Z"/>'
-           '<path fill="#c6dbc9" d="M0 260V205L160 145 300 192 470 124 640 202 820 152 1000 212 1180 164 1320 202 1440 182V260Z"/></svg>')
+    n = len(stages)
+    nodes = ''.join(f'<button class="jn" type="button" data-i="{i}" aria-label="Stage {i+1}: {t}">{aicon(pin)}</button>' for i, (pin, f, t, dsc) in enumerate(stages))
+    slides = ''.join(
+        f'<article class="jslide" id="stage{i+1}" aria-label="Stage {i+1} of {n}">'
+        f'<div class="jimg">{img(f, t, "(min-width:980px) 600px, 86vw")}</div>'
+        f'<div class="jtxt"><span class="stage">Stage {i+1} of {n}</span><h3>{t}</h3><p>{dsc}</p></div></article>'
+        for i, (pin, f, t, dsc) in enumerate(stages))
+    mtn = ('<svg class="mtn" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">'
+           '<path fill="#d9e6dc" d="M0 200V130L130 66 230 112 360 44 480 104 610 58 760 130 900 52 1040 112 1180 76 1320 122 1440 90V200Z"/>'
+           '<path fill="#c6dbc9" d="M0 200V156L160 108 300 146 470 94 640 154 820 114 1000 160 1180 122 1320 154 1440 138V200Z"/></svg>')
     hills = ('<svg class="hills" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">'
              '<path fill="#dcebcf" d="M0 100C240 40 480 50 720 90S1200 130 1440 70V220H0Z"/>'
              '<path fill="#c8e0b8" d="M0 140C300 90 600 120 840 150S1260 160 1440 120V220H0Z"/>'
              '<path fill="#f3efe3" d="M0 182C320 152 640 172 900 186S1300 180 1440 170V220H0Z"/></svg>')
-    scene = (f'<div class="deco-wrap jscene"><span class="sun"></span>{mtn}{deco("cloud","tl",150,at="top:70px;left:8%")}{deco("cloud","tr",120,at="top:120px;right:14%",op=.2)}{hills}'
-             f'{deco("tree","bl",90,at="bottom:70px;left:6%",op=.3)}{deco("tree","bl",64,at="bottom:84px;left:11%",op=.25)}{deco("tree","br",84,at="bottom:72px;right:8%",op=.3)}</div>')
-    road = ('<svg class="road" aria-hidden="true"><path class="rb"/><path class="rd"/><path class="rc"/><path class="rp"/>'
-            '<g class="trav"><circle r="15"/><circle r="6"/></g></svg>')
-    head = sh('How Welkin grows', 'Follow the road through the farm', 'Six stages of one farm growing in Sopore — from the orchard to the tanks and fields. Scroll to travel the road.')
+    scene = (f'<div class="deco-wrap jscene"><span class="sun"></span>{mtn}{deco("cloud","tl",140,at="top:50px;left:8%")}{hills}</div>')
+    road = '<svg class="jroad" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true"><path class="jb" d="M18 70C130 8 240 8 340 62S560 112 660 58 880 6 982 62"/><path class="jd" d="M18 70C130 8 240 8 340 62S560 112 660 58 880 6 982 62"/><path class="jp" d="M18 70C130 8 240 8 340 62S560 112 660 58 880 6 982 62"/></svg>'
+    head = sh('How Welkin grows', 'Six stages, one farm', 'Tap a stop on the road, or swipe through the stages.')
     return (f'<section class="sec journey" id="journey">{scene}<div class="wrap">{head}'
-            f'<div class="jr" id="jr">{road}<ol class="stops">{items}</ol></div></div></section>')
+            f'<div class="jt" id="jt"><div class="jtrack">{road}{nodes}</div>'
+            f'<div class="jslides" id="jslides" tabindex="0" aria-label="Farm stages">{slides}</div>'
+            f'<div class="jctl"><button class="jbtn" id="jprev" type="button" aria-label="Previous stage">‹</button><span class="jcount" id="jcount">1 / {n}</span><button class="jbtn" id="jnext" type="button" aria-label="Next stage">›</button></div></div>'
+            f'</div></section>')
+
+# ---------- Android-style app shell (phones) ----------
+def _mi(path):
+    return f'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{path}</svg>'
+
+MI = {
+    'home': _mi('<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>'),
+    'shop': _mi('<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
+    'farm': _mi('<path d="M12 21v-9"/><path d="M12 13c0-4-3-6-7-6 0 4 3 6 7 6z"/><path d="M12 15c0-3 2-5 6-5 0 3-2 5-6 5z"/>'),
+    'seasons': _mi('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>'),
+    'more': _mi('<circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/>'),
+    'gallery': _mi('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/>'),
+    'jobs': _mi('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>'),
+    'mail': _mi('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'),
+    'phone': AB_CALL,
+}
+
+def appnav(active, sub):
+    cur = {'home': 'home', 'shop': 'shop', 'farm': 'farm', 'seasons': 'seasons'}.get(active, 'more')
+    def item(key, label, href=None, sheet=None):
+        on = ' on' if key == cur else ''
+        attr = f'href="{href}"' if href else f'type="button" data-sheet="{sheet}"'
+        tag = 'a' if href else 'button'
+        return f'<{tag} class="bn{on}" {attr}{" aria-current=page" if on and href else ""}><span class="bpill">{MI[key]}</span><span class="lbl">{label}</span></{tag}>'
+    nav = ('<nav class="bnav" aria-label="Primary">' + item('home', 'Home', 'index.html') + item('shop', 'Shop', 'shop.html')
+           + item('farm', 'Farm', sheet='farm') + item('seasons', 'Seasons', 'seasons.html') + item('more', 'More', sheet='more') + '</nav>')
+    def row(href, icon, label, sub_, ext=False):
+        t = ' target="_blank" rel="noopener"' if ext else ''
+        return f'<a class="srow" href="{href}"{t}><span class="sic">{icon}</span><span><b>{label}</b><small>{sub_}</small></span></a>'
+    farm = ''.join(row(h, aicon(ic), l, d) for (h, ic, l, d) in [
+        ('orchard.html', 'apple', 'Orchard', 'Apples, cherries, nectarines & more'),
+        ('aquaculture.html', 'fish', 'Aquaculture', 'Rainbow trout from Welkin Aquaculture'),
+        ('livestock.html', 'sheep', 'Livestock', 'Sheep, bulls, milk & Qurbani'),
+        ('visits.html', 'wheat', 'Farm visits', 'Student days in the fields')])
+    more = (row('gallery.html', MI['gallery'], 'Gallery', 'Photos from the farm') + row('careers.html', MI['jobs'], 'Careers', 'Join the Welkin team')
+            + row('contact.html', MI['mail'], 'Contact & map', 'Order, enquire, find us')
+            + row('tel:+917006901374', MI['phone'], 'Call us', '70069 01374')
+            + row('https://www.instagram.com/welkinfarmstead/', ICON['ig'], 'Instagram', '@welkinfarmstead', True)
+            + row('https://www.facebook.com/welkinfarmstead/', ICON['fb'], 'Facebook', 'Welkin Farmstead', True))
+    def sheet(sid, title, rows):
+        return (f'<div class="sheet" id="sheet-{sid}" role="dialog" aria-modal="true" aria-label="{title}" hidden><div class="sheet-bd" data-close></div>'
+                f'<div class="sheet-p"><span class="grab" aria-hidden="true"></span><h2>{title}</h2><div class="srows">{rows}</div></div></div>')
+    fab = f'<a class="fab" href="{wa("Salaam Welkin Farmstead! I\'d like to know more.")}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">{ICON["wa"]}</a>'
+    return nav + sheet('farm', 'Our farm', farm) + sheet('more', 'More', more) + fab
 
 # ---------- components ----------
 def phead(crumbs, h1, lead, banner_file, banner_alt, ctas=''):
@@ -368,7 +427,8 @@ def home():
     find = sec(findus())
     season = style(season, '', deco('sprig', 'tr', 200, 14, at='top:10px;right:0'))
     visit = style(visit, 'tint', deco('tree', 'bl', 150, at='bottom:10px;left:2%') + deco('wheat', 'tr', 110, 8, at='top:20px;right:3%'))
-    return hero + strip() + featured + why + story + farm + season + visit + find + follow_band() + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
+    qb = f'<div class="wrap qb"><div class="qb-card"><div><b>Eid-ul-Adha Qurbani bookings are open</b><span>Dumba, Merino and bulls — reserve early.</span></div>{wabtn("Salaam Welkin Farmstead! I\'d like to book an animal for Eid-ul-Adha Qurbani.", "Book", "btn btn-sm btn-green")}</div></div>'
+    return hero + qb + strip() + featured + why + story + farm + season + visit + find + follow_band() + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
 
 def shop():
     chips = '<div class="chips" role="group" aria-label="Filter products"><button class="on" data-f="all">All</button><button data-f="fruit">Fruit &amp; nuts</button><button data-f="fish">Fish</button><button data-f="live">Livestock</button></div>'

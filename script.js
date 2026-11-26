@@ -154,58 +154,123 @@
   lb.addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) show(i + (d < 0 ? 1 : -1)); });
 })();
 
-
-/* ===== journey: winding road drawn through the stops, travelled as you scroll ===== */
+/* ===== real map (Leaflet + OpenStreetMap tiles) ===== */
 (() => {
-  const jr = document.getElementById('jr');
-  if (!jr) return;
-  const svg = jr.querySelector('.road'), paths = [...svg.querySelectorAll('path')];
-  const rp = svg.querySelector('.rp'), trav = svg.querySelector('.trav');
-  const stops = [...jr.querySelectorAll('.stop')];
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let pts = [], L = 1, busy = false;
+  const el = document.getElementById('locmap');
+  if (!el) return;
+  // Edit coordinates here. Both sites currently use the centre of Sopore until exact pins are confirmed.
+  const LOCS = [
+    { name: 'Welkin Farmstead', lat: 34.301, lng: 74.466, text: 'Orchards, livestock and paddy fields, Sopore, Kashmir 193201. Message us before you visit so we can guide you in.' },
+    { name: 'Welkin Aquaculture', lat: 34.301, lng: 74.466, text: 'Rainbow trout in recirculating tanks — expanding in Model Town, Sopore.' },
+  ];
+  let started = false;
+  const start = () => {
+    if (started || !window.L) return;
+    started = true;
+    const mobile = L.Browser.mobile;
+    const map = L.map(el, { zoomControl: false, scrollWheelZoom: false, dragging: !mobile, tap: false, attributionControl: true })
+      .setView([LOCS[0].lat, LOCS[0].lng], 13);
+    map.attributionControl.setPrefix(false);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+    }).addTo(map);
+    const area = L.circle([LOCS[0].lat, LOCS[0].lng], { radius: 650, color: '#f26a21', weight: 1.5, fillColor: '#f26a21', fillOpacity: .12 }).addTo(map);
+    const pin = n => L.divIcon({ className: 'lm-pin', html: `<span><b>${n}</b></span>`, iconSize: [34, 34], iconAnchor: [17, 40] });
+    const marker = L.marker([LOCS[0].lat, LOCS[0].lng], { icon: pin(1), keyboard: false, title: LOCS[0].name }).addTo(map);
+    const tabs = [...document.querySelectorAll('.lm-tabs button')];
+    const nm = document.getElementById('lmName'), tx = document.getElementById('lmText');
+    const select = i => {
+      const l = LOCS[i];
+      tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', j === i); });
+      nm.textContent = l.name; tx.textContent = l.text;
+      marker.setIcon(pin(i + 1)); marker.options.title = l.name;
+      marker.setLatLng([l.lat, l.lng]); area.setLatLng([l.lat, l.lng]);
+      map.flyTo([l.lat, l.lng], map.getZoom(), { duration: .6 });
+    };
+    tabs.forEach((t, i) => t.addEventListener('click', () => select(i)));
+    tx.textContent = LOCS[0].text;
+    map.on('click', () => map.scrollWheelZoom.enable());
+    map.on('mouseout', () => map.scrollWheelZoom.disable());
+    setTimeout(() => map.invalidateSize(), 300);
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: '300px' });
+      io.observe(el);
+    } else start();
+  });
+})();
 
-  const build = () => {
-    const jb = jr.getBoundingClientRect(), W = jb.width, H = jb.height;
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    pts = stops.map(s => { const r = s.querySelector('.pin').getBoundingClientRect(); return { x: r.left + r.width / 2 - jb.left, y: r.top + r.height / 2 - jb.top }; });
-    const mob = innerWidth <= 760, A = mob ? 12 : Math.min(62, W * .055);
-    const wp = [{ x: pts[0].x, y: Math.max(0, pts[0].y - 130) }];
-    pts.forEach((p, i) => {
-      wp.push(p);
-      const n = pts[i + 1];
-      if (n) wp.push({ x: (p.x + n.x) / 2 + (i % 2 ? 1 : -1) * A, y: (p.y + n.y) / 2 });
+/* ===== journey: road + swipeable stage cards ===== */
+(() => {
+  const jt = document.getElementById('jt');
+  if (!jt) return;
+  const $$ = (s, c = jt) => [...c.querySelectorAll(s)];
+  const prog = jt.querySelector('.jp'), sl = document.getElementById('jslides'), cnt = document.getElementById('jcount');
+  const nodes = $$('.jn'), slides = $$('.jslide'), n = slides.length;
+  let cur = 0, lens = [], L = prog.getTotalLength(), lock = false;
+
+  const place = () => {
+    L = prog.getTotalLength();
+    lens = nodes.map((_, i) => L * (.05 + .9 * i / (n - 1)));
+    nodes.forEach((nd, i) => {
+      const p = prog.getPointAtLength(lens[i]);
+      nd.style.left = (p.x / 1000 * 100) + '%';
+      nd.style.top = (p.y / 120 * 100) + '%';
     });
-    const last = pts[pts.length - 1];
-    wp.push({ x: last.x, y: Math.min(H, last.y + 130) });
-    let d = `M${wp[0].x.toFixed(1)} ${wp[0].y.toFixed(1)}`;
-    for (let i = 0; i < wp.length - 1; i++) {
-      const p0 = wp[i - 1] || wp[i], p1 = wp[i], p2 = wp[i + 1], p3 = wp[i + 2] || p2;
-      const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
-      const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
-      d += ` C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
-    }
-    paths.forEach(p => p.setAttribute('d', d));
-    L = rp.getTotalLength();
-    rp.style.strokeDasharray = L;
-    update();
+    prog.style.strokeDasharray = L;
+    paint();
   };
-
-  const update = () => {
-    busy = false;
-    const jb = jr.getBoundingClientRect(), mark = innerHeight * .6;
-    let p = still ? 1 : Math.max(0, Math.min(1, (mark - jb.top) / jb.height));
-    rp.style.strokeDashoffset = L * (1 - p);
-    const pt = rp.getPointAtLength(L * p);
-    trav.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
-    stops.forEach((s, i) => s.classList.toggle('on', still || pts[i].y <= pt.y + 6));
+  const paint = () => {
+    nodes.forEach((nd, i) => { nd.classList.toggle('on', i === cur); nd.classList.toggle('done', i < cur); });
+    prog.style.strokeDashoffset = L - lens[cur];
+    cnt.textContent = `${cur + 1} / ${n}`;
   };
+  const stride = () => (slides[1] ? slides[1].offsetLeft - slides[0].offsetLeft : sl.clientWidth);
+  const go = i => {
+    cur = Math.max(0, Math.min(n - 1, i));
+    paint();
+    lock = true;
+    sl.scrollTo({ left: cur * stride(), behavior: 'smooth' });
+    setTimeout(() => { lock = false; }, 600);
+  };
+  sl.addEventListener('scroll', () => {
+    if (lock) return;
+    const i = Math.round(sl.scrollLeft / stride());
+    if (i !== cur && i >= 0 && i < n) { cur = i; paint(); }
+  }, { passive: true });
+  nodes.forEach((nd, i) => nd.addEventListener('click', () => go(i)));
+  document.getElementById('jprev').addEventListener('click', () => go(cur - 1));
+  document.getElementById('jnext').addEventListener('click', () => go(cur + 1));
+  sl.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+  });
+  addEventListener('resize', () => { place(); sl.scrollLeft = cur * stride(); });
+  place();
+})();
 
-  if (still) jr.classList.add('static');
-  const tick = () => { if (!busy) { busy = true; requestAnimationFrame(update); } };
-  addEventListener('scroll', tick, { passive: true });
-  addEventListener('resize', build);
-  addEventListener('load', build);
-  if ('ResizeObserver' in window) new ResizeObserver(build).observe(jr);
-  build();
+/* ===== app shell: bottom sheets + back button ===== */
+(() => {
+  const sheets = [...document.querySelectorAll('.sheet')];
+  if (!sheets.length) return;
+  const close = () => { sheets.forEach(s => { s.hidden = true; }); document.body.style.overflow = ''; };
+  document.querySelectorAll('[data-sheet]').forEach(b => b.addEventListener('click', () => {
+    const s = document.getElementById('sheet-' + b.dataset.sheet);
+    const wasOpen = !s.hidden;
+    close();
+    if (!wasOpen) { s.hidden = false; document.body.style.overflow = 'hidden'; }
+  }));
+  sheets.forEach(s => s.addEventListener('click', e => { if (e.target.closest('[data-close]') || e.target.closest('a')) close(); }));
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  matchMedia('(min-width:861px)').addEventListener('change', close);
+
+  const back = document.querySelector('.ab-back');
+  if (back) back.addEventListener('click', e => {
+    try {
+      if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); }
+    } catch (_) { /* fall through to the link */ }
+  });
 })();
