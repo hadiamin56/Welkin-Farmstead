@@ -2,6 +2,7 @@
 """Generates the static pages. Run:  python3 build.py   (needs Pillow for image sizes)"""
 import os
 from PIL import Image
+from art import SPRITE, SKYLINE, MAP_SVG
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PH = os.path.join(ROOT, 'assets', 'photos')
@@ -78,7 +79,7 @@ def header(active, sub):
 
 def footer():
     farm = ''.join(f'<a href="{h}">{l}</a>' for _, h, l, _ in FARM)
-    return f'''<footer class="footer">
+    return SKYLINE + f'''<footer class="footer">
   <div class="wrap fgrid">
     <div class="fb"><img src="assets/logo.png" alt="Welkin Farmstead logo" width="56" height="56" loading="lazy"><div><b>Welkin Farmstead</b><span>Where goodness grows.</span></div></div>
     <div><h4>Explore</h4><a href="index.html">Home</a><a href="shop.html">Farm shop</a><a href="seasons.html">Seasons</a><a href="gallery.html">Gallery</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a></div>
@@ -118,8 +119,10 @@ def page(fname, title, desc, body, active='', sub='', og='hero.jpg', preload=Non
 {LD}
 </head>
 <body data-page="{active}">
+{SPRITE}
 {header(active, sub)}
 <main id="main">
+{bg_layer(sub or active)}
 {body}
 </main>
 {footer()}
@@ -165,7 +168,7 @@ def findus(compact=False):
     </ul>
     <div class="actions"><a class="btn btn-green" href="https://www.google.com/maps/dir/?api=1&destination={MAPQ}" target="_blank" rel="noopener">Get directions</a><a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={MAPQ}" target="_blank" rel="noopener">Open in Maps</a></div>
   </div>
-  <div class="map"><iframe title="Map showing Welkin Farmstead in Sopore, Kashmir" src="https://www.google.com/maps?q={MAPQ}&z=13&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+  <div class="map">{MAP_SVG}<div class="legend"><span><i class="lg r"></i>Welkin Farmstead</span><span><i class="lg t"></i>Welkin Aquaculture</span><span><i class="lg g"></i>Orchards</span><span><i class="lg b"></i>Jhelum river</span></div></div>
 </div>'''
 
 def features():
@@ -196,6 +199,63 @@ GALLERY = [('hero.jpg', 'Aerial view of the farm'), ('orchard.jpg', 'In the orch
 def gallery_grid():
     return '<div class="gal">' + ''.join(
         f'<a href="assets/photos/{f}" data-cap="{c}"><span class="gimg">{img(f, c, "(min-width:980px) 360px, 50vw")}</span><span class="gcap">{c}</span></a>' for f, c in GALLERY) + '</div>'
+
+
+# ---------- background graphics ----------
+VB = {'apple': (100, 100), 'fish': (140, 80), 'sheep': (120, 100), 'wheat': (80, 120), 'cherry': (100, 100), 'walnut': (100, 100), 'tree': (100, 120), 'branch': (160, 100)}
+THEMES = {
+    'home': ['tree', 'apple', 'fish', 'sheep', 'branch', 'cherry', 'wheat', 'fish', 'apple', 'tree'],
+    'shop': ['apple', 'fish', 'sheep', 'cherry', 'walnut', 'branch'],
+    'orchard': ['apple', 'tree', 'cherry', 'branch', 'apple', 'walnut'],
+    'aqua': ['fish', 'fish', 'fish', 'fish', 'fish', 'fish'],
+    'livestock': ['sheep', 'wheat', 'tree', 'sheep', 'wheat', 'sheep'],
+    'visits': ['wheat', 'tree', 'apple', 'wheat', 'branch', 'wheat'],
+    'seasons': ['cherry', 'apple', 'walnut', 'wheat', 'branch', 'fish'],
+    'gallery': ['apple', 'fish', 'sheep', 'cherry', 'tree', 'wheat'],
+    'careers': ['wheat', 'tree', 'branch', 'apple', 'wheat', 'sheep'],
+    'contact': ['branch', 'apple', 'tree', 'cherry', 'fish', 'sheep'],
+}
+def bg_layer(theme):
+    names = THEMES.get(theme)
+    if not names:
+        return ''
+    out = []
+    n = len(names)
+    for i, nm in enumerate(names):
+        w, h = VB[nm]
+        size = 96 + (i * 37) % 70
+        left = (2 + (i * 7) % 6) if i % 2 == 0 else None
+        top = 4 + i * (88 / n)
+        side = f'left:{left}%' if left is not None else f'right:{2 + (i * 5) % 6}%'
+        rot = (-18, 12, -8, 20, -24, 8, 16, -12, 22, -6)[i % 10]
+        dur = 8 + (i * 3) % 7
+        out.append(f'<svg class="d" style="top:{top:.1f}%;{side};width:{size}px;aspect-ratio:{w}/{h};--r:{rot}deg;animation-duration:{dur}s;animation-delay:-{i * 1.7:.1f}s" viewBox="0 0 {w} {h}"><use href="#d-{nm}"/></svg>')
+    return '<div class="bgd" aria-hidden="true">' + ''.join(out) + '</div>'
+
+def strip():
+    words = ['Apples', 'Rainbow Trout', 'Ruby Nectarines', 'Cherries', 'Apricots', 'Kiwi', 'Walnuts', 'Pears', 'Dumba &amp; Merino', 'Fresh Milk']
+    icons = ['apple', 'fish', 'apple', 'cherry', 'apple', 'apple', 'walnut', 'apple', 'sheep', 'wheat']
+    def one(prefix=''):
+        return ''.join(f'<span><svg viewBox="0 0 {VB[ic][0]} {VB[ic][1]}" aria-hidden="true"><use href="#d-{ic}"/></svg>{w}</span>' for w, ic in zip(words, icons))
+    return f'<div class="strip" aria-hidden="true"><div class="stk">{one()}{one()}</div></div>'
+
+def journey():
+    chapters = [
+        ('tree', 'orchard.jpg', 'Chapter 1', 'The first trees', 'It began with high-density apple orchards in Sopore — closely planted rows built for early, generous fruit.'),
+        ('cherry', 'harvest.jpg', 'Chapter 2', 'More to harvest', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts joined the apples.'),
+        ('sheep', 'livestock.jpg', 'Chapter 3', 'A herd on the green', 'Dumba and Merino sheep, bulls and milk — the farm\'s animals, raised on open pasture.'),
+        ('fish', 'tanks-wide.jpg', 'Chapter 4', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
+        ('wheat', 'paddy.jpg', 'Chapter 5', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
+        ('apple', 'hero.jpg', 'Chapter 6', 'Growing together', 'A growing team, Qurbani bookings, fresh orders — and the next chapter still to be written.'),
+    ]
+    items = ''
+    for i, (ic, f, tag, t, d) in enumerate(chapters):
+        side = 'l' if i % 2 == 0 else 'r'
+        w, h = VB[ic]
+        items += (f'<li class="tl-item {side}"><div class="tl-card">{ph(f, "", "", t, "(min-width:980px) 440px, 90vw")}'
+                  f'<div class="tl-txt"><span class="tl-tag">{tag}</span><h3>{t}</h3><p>{d}</p></div></div>'
+                  f'<span class="tl-node"><svg viewBox="0 0 {w} {h}" aria-hidden="true"><use href="#d-{ic}"/></svg></span></li>')
+    return f'<div class="tl" id="tl"><span class="tl-line"><i></i></span><ol>{items}</ol></div>'
 
 # ---------- components ----------
 def phead(crumbs, h1, lead, banner_file, banner_alt, ctas=''):
@@ -283,6 +343,7 @@ def home():
                    '<div class="cards">' + ''.join(card(PRODUCTS[i]) for i in (0, 1, 4, 5)) + '</div>' +
                    '<p class="more"><a class="btn btn-ghost" href="shop.html">See all products →</a></p>')
     why = sec(sh('Why Welkin', 'Goodness you can trace') + features())
+    story = sec(sh('The Welkin journey', 'From the first tree to the table', 'Six chapters of one farm growing in Sopore.') + journey(), tint=True)
     farm = sec(sh('Our farm', 'Four ways we farm') + tiles(), tint=True)
     season = sec(sh('Seasons', "In season right now", 'Typical Kashmir timing — message us for exact availability.') +
                  '<ul class="slist" id="slist" aria-live="polite"></ul><p class="more"><a class="btn btn-ghost" href="seasons.html">Full season calendar →</a></p>')
@@ -290,7 +351,7 @@ def home():
         '<p class="eyebrow">Farm visits</p><h2>A day in the fields</h2><p class="sub">Schools and colleges are welcome to spend a day with us — harvesting, threshing, winnowing and touring the orchard, herd and trout tanks.</p><p><a class="btn btn-green" href="visits.html">Plan a visit</a></p>',
         ph('paddy.jpg', 'Students on a Welkin farm visit', '', None, '(min-width:980px) 560px, 100vw')), tint=True)
     find = sec(findus())
-    return hero + featured + why + farm + season + visit + find + follow_band() + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
+    return hero + strip() + featured + why + story + farm + season + visit + find + follow_band() + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
 
 def shop():
     chips = '<div class="chips" role="group" aria-label="Filter products"><button class="on" data-f="all">All</button><button data-f="fruit">Fruit &amp; nuts</button><button data-f="fish">Fish</button><button data-f="live">Livestock</button></div>'
