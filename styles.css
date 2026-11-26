@@ -392,7 +392,7 @@ main>*{position:relative}
   .pdeco .deco:nth-child(n+3){display:none}
 }
 @media (prefers-reduced-motion:reduce){
-  .deco,.blob{animation:none!important}
+  .deco,.blob,.jslide.act .jimg img,.jslide.act .jtxt>*{animation:none!important}
 }
 
 /* ===== real map card (OpenStreetMap via Leaflet) ===== */
@@ -422,35 +422,50 @@ main>*{position:relative}
 .lm-pin span{display:grid;place-items:center;width:34px;height:34px;border-radius:50% 50% 50% 0;background:#f26a21;rotate:-45deg;box-shadow:0 3px 8px rgba(0,0,0,.35);border:2px solid #fff}
 .lm-pin b{rotate:45deg;color:#fff;font:700 .85rem var(--font)}
 
-/* ===== journey: compact road + swipeable stage cards ===== */
-.journey{background:linear-gradient(#e4efe8,var(--bg) 46%);padding-top:clamp(110px,13vw,180px);padding-bottom:clamp(90px,11vw,150px)}
-.jscene .mtn{position:absolute;left:0;top:0;width:100%;height:clamp(90px,12vw,160px);-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
-.jscene .sun{position:absolute;top:22px;right:12%;width:clamp(44px,5.5vw,76px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff6d6 0 36%,#ffe49a 37% 63%,rgba(255,228,154,.4) 64%);box-shadow:0 0 60px 20px rgba(255,220,140,.45)}
-.jscene .hills{position:absolute;left:0;bottom:-1px;width:100%;height:clamp(90px,11vw,160px)}
-.jscene .deco{opacity:.22;color:var(--green)}
+/* ===== journey: clean stepper + auto-playing stage cards ===== */
+.journey{background:var(--bg);padding-top:clamp(56px,7vw,96px);padding-bottom:clamp(56px,7vw,96px)}
 .jt{margin-top:4px}
-.jtrack{position:relative;height:clamp(84px,9vw,116px);margin:0 clamp(26px,3vw,40px) 18px}
-.jroad{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.jroad path{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.jroad .jb{stroke:#c7b68a;stroke-width:22}
-.jroad .jd{stroke:#ece2c6;stroke-width:16}
-.jroad .jp{stroke:var(--green);stroke-width:4;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
-.jn{position:absolute;transform:translate(-50%,-50%);width:50px;height:50px;padding:0;border-radius:50%;background:#fff;border:3px solid #cdbf9b;color:#9b8d68;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.14);transition:transform .35s,background .35s,color .35s,border-color .35s,box-shadow .35s}
-.jn .ai{width:26px;height:26px;stroke-width:7}
-.jn.done{border-color:var(--green);color:var(--green)}
-.jn.on{background:var(--green);border-color:var(--green);color:#fff;transform:translate(-50%,-50%) scale(1.15);box-shadow:0 0 0 8px rgba(31,90,58,.16)}
+.jsteps{position:relative;margin-bottom:22px}
+.jsteps ol{list-style:none;display:grid;grid-template-columns:repeat(6,1fr);position:relative;z-index:1}
+.jline{position:absolute;left:calc(100% / 12);right:calc(100% / 12);top:26px;height:4px;border-radius:4px;background:#e1dcc9;overflow:hidden}
+.jline i{position:absolute;top:0;bottom:0;left:0;border-radius:4px}
+.jfill{background:var(--green);width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.jtick{background:linear-gradient(90deg,var(--green),#7bb661);width:0;opacity:.9}
+.jtick.run{animation:jtick var(--dwell,6s) linear forwards}
+@keyframes jtick{from{width:0}to{width:var(--seg,20%)}}
+.jn{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:0;background:none;border:0;cursor:pointer;font:inherit;color:#7d8a7f}
+.jn .ai{box-sizing:content-box;width:26px;height:26px;padding:12px;border-radius:50%;background:#fff;border:2px solid #d3cdb7;stroke-width:7;color:#8a9a8c;transition:transform .35s,background .35s,border-color .35s,color .35s,box-shadow .35s}
+.jn:hover .ai{border-color:var(--green);color:var(--green)}
+.jl{font-size:.78rem;font-weight:600;line-height:1.2;text-align:center;transition:color .3s}
+.jn.done .ai{border-color:var(--green);color:var(--green);background:#eaf3e6}
+.jn.done .jl{color:#4d6a55}
+.jn.on .ai{background:var(--green);border-color:var(--green);color:#fff;transform:scale(1.1);box-shadow:0 0 0 7px rgba(31,90,58,.16)}
+.jn.on .jl{color:var(--ink)}
+.jn:focus-visible{outline:none}
+.jn:focus-visible .ai{outline:3px solid rgba(31,90,58,.4);outline-offset:3px}
 .jslides{position:relative;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;outline:none;border-radius:20px}
 .jslides::-webkit-scrollbar{display:none}
 .jslide{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:1.15fr 1fr;background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 14px 30px rgba(23,38,28,.09)}
-.jimg{position:relative;min-height:300px;background:var(--soft)}
-.jimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.jimg{position:relative;min-height:300px;background:var(--soft);overflow:hidden}
+.jimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.02)}
+.jslide.act .jimg img{animation:kb 9s ease-out forwards}
+@keyframes kb{from{transform:scale(1.1)}to{transform:scale(1.02)}}
 .jtxt{padding:clamp(18px,3vw,38px);display:flex;flex-direction:column;justify-content:center;gap:.45rem}
+.jslide.act .jtxt>*{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.jslide.act .jtxt>:nth-child(2){animation-delay:.08s}.jslide.act .jtxt>:nth-child(3){animation-delay:.16s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
 .jtxt h3{font-size:clamp(1.3rem,2.2vw,1.7rem)}
 .jtxt p{color:var(--muted)}
 .stage{align-self:flex-start;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:var(--soft);padding:.22rem .7rem;border-radius:99px}
-.jctl{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px}
-.jbtn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--green);background:#fff;color:var(--green);font-size:1.5rem;line-height:1;cursor:pointer;transition:.2s}
-.jbtn:hover{background:var(--green);color:#fff}
+.jctl{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
+.jbtn,.jplay{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--green);background:#fff;color:var(--green);font-size:1.5rem;line-height:1;cursor:pointer;transition:.2s;display:grid;place-items:center;padding:0}
+.jbtn:hover,.jplay:hover{background:var(--green);color:#fff}
+.jplay{background:var(--green);color:#fff}
+.jplay:hover{background:var(--green2)}
+.jplay .ic-pause{width:14px;height:16px;border-left:4px solid currentColor;border-right:4px solid currentColor}
+.jplay .ic-play{display:none;width:0;height:0;border-left:15px solid currentColor;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+.jplay[data-state=pause] .ic-pause{display:none}
+.jplay[data-state=pause] .ic-play{display:block}
 .jcount{font-weight:600;font-size:.9rem;min-width:3.5rem;text-align:center;color:var(--muted)}
 
 /* ===== app shell elements (hidden on desktop) ===== */
@@ -586,16 +601,16 @@ main>*{position:relative}
   .lm-map{height:280px}
   .lm-head{font-size:.62rem}
 
-  /* journey as swipe cards */
-  .journey{padding-top:110px;padding-bottom:84px}
-  .jtrack{margin:0 22px 14px;height:76px}
-  .jn{width:40px;height:40px}
-  .jn .ai{width:22px;height:22px}
+  /* journey: stepper + swipe cards */
+  .journey{padding-top:36px;padding-bottom:40px}
+  .jline{top:22px}
+  .jn .ai{width:20px;height:20px;padding:10px}
+  .jl{font-size:.64rem}
   .jslides{margin:0 -16px;padding:0 16px;scroll-padding-left:16px;gap:12px;border-radius:0}
-  .jslide{flex:0 0 84%;grid-template-columns:1fr;border-radius:20px}
+  .jslide{flex:0 0 86%;grid-template-columns:1fr;border-radius:20px}
   .jimg{min-height:0;aspect-ratio:16/10}
   .jtxt{padding:16px}
-  .jbtn{display:none}
+  .jctl{margin-top:14px}
 
   /* footer: nav lives in the bottom bar */
   .footer{padding:24px 0 6px}
@@ -605,7 +620,7 @@ main>*{position:relative}
 }
 @media (min-width:601px) and (max-width:860px){
   .card{flex-basis:44%}
-  .jslide{flex-basis:70%}
+  .jslide{flex-basis:72%}
   .collage .a{aspect-ratio:16/9}
 }
 @media (max-width:360px){

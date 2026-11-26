@@ -229,34 +229,30 @@ def strip():
 
 def journey_section():
     stages = [
-        ('tree', 'orchard.jpg', 'Orchards take root', 'High-density apple blocks in Sopore — closely planted rows built for early, generous fruit.'),
-        ('apple', 'harvest.jpg', 'A fuller basket', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts join the apples.'),
-        ('sheep', 'livestock.jpg', 'A herd on the green', 'Dumba and Merino sheep, bulls and fresh milk — raised on open pasture, with Qurbani bookings each Eid-ul-Adha.'),
-        ('fish', 'tanks-wide.jpg', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
-        ('wheat', 'paddy.jpg', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
-        ('sprig', 'hero.jpg', 'Growing together', 'A growing team across operations, sales, logistics and more — and the next stage still to be written.'),
+        ('tree', 'Orchards', 'orchard.jpg', 'Orchards take root', 'High-density apple blocks in Sopore — closely planted rows built for early, generous fruit.'),
+        ('apple', 'Fruit basket', 'harvest.jpg', 'A fuller basket', 'Pears, Ruby Nectarines, apricots, three cherry varieties, kiwi and walnuts join the apples.'),
+        ('sheep', 'Herd', 'livestock.jpg', 'A herd on the green', 'Dumba and Merino sheep, bulls and fresh milk — raised on open pasture, with Qurbani bookings each Eid-ul-Adha.'),
+        ('fish', 'Aquaculture', 'tanks-wide.jpg', 'Welkin Aquaculture', 'Rainbow trout in clean recirculating tanks, now expanding in Model Town, Sopore.'),
+        ('wheat', 'Fields', 'paddy.jpg', 'Fields that teach', 'Students arrive to harvest, thresh and winnow — the farm becomes a classroom.'),
+        ('sprig', 'Team', 'hero.jpg', 'Growing together', 'A growing team across operations, sales, logistics and more — and the next stage still to be written.'),
     ]
     n = len(stages)
-    nodes = ''.join(f'<button class="jn" type="button" data-i="{i}" aria-label="Stage {i+1}: {t}">{aicon(pin)}</button>' for i, (pin, f, t, dsc) in enumerate(stages))
+    steps = ''.join(
+        f'<li><button class="jn" type="button" data-i="{i}" aria-label="Stage {i+1}: {t}">{aicon(pin)}<span class="jl">{lab}</span></button></li>'
+        for i, (pin, lab, f, t, dsc) in enumerate(stages))
     slides = ''.join(
         f'<article class="jslide" id="stage{i+1}" aria-label="Stage {i+1} of {n}">'
         f'<div class="jimg">{img(f, t, "(min-width:980px) 600px, 86vw")}</div>'
         f'<div class="jtxt"><span class="stage">Stage {i+1} of {n}</span><h3>{t}</h3><p>{dsc}</p></div></article>'
-        for i, (pin, f, t, dsc) in enumerate(stages))
-    mtn = ('<svg class="mtn" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">'
-           '<path fill="#d9e6dc" d="M0 200V130L130 66 230 112 360 44 480 104 610 58 760 130 900 52 1040 112 1180 76 1320 122 1440 90V200Z"/>'
-           '<path fill="#c6dbc9" d="M0 200V156L160 108 300 146 470 94 640 154 820 114 1000 160 1180 122 1320 154 1440 138V200Z"/></svg>')
-    hills = ('<svg class="hills" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">'
-             '<path fill="#dcebcf" d="M0 100C240 40 480 50 720 90S1200 130 1440 70V220H0Z"/>'
-             '<path fill="#c8e0b8" d="M0 140C300 90 600 120 840 150S1260 160 1440 120V220H0Z"/>'
-             '<path fill="#f3efe3" d="M0 182C320 152 640 172 900 186S1300 180 1440 170V220H0Z"/></svg>')
-    scene = (f'<div class="deco-wrap jscene"><span class="sun"></span>{mtn}{deco("cloud","tl",140,at="top:50px;left:8%")}{hills}</div>')
-    road = '<svg class="jroad" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true"><path class="jb" d="M18 70C130 8 240 8 340 62S560 112 660 58 880 6 982 62"/><path class="jd" d="M18 70C130 8 240 8 340 62S560 112 660 58 880 6 982 62"/><path class="jp" d="M18 70C130 8 240 8 340 62S560 112 660 58 880 6 982 62"/></svg>'
-    head = sh('How Welkin grows', 'Six stages, one farm', 'Tap a stop on the road, or swipe through the stages.')
-    return (f'<section class="sec journey" id="journey">{scene}<div class="wrap">{head}'
-            f'<div class="jt" id="jt"><div class="jtrack">{road}{nodes}</div>'
+        for i, (pin, lab, f, t, dsc) in enumerate(stages))
+    head = sh('How Welkin grows', 'Six stages, one farm', 'Follow the journey automatically, or tap any stage.')
+    return (f'<section class="sec journey" id="journey"><div class="wrap">{head}'
+            f'<div class="jt" id="jt"><div class="jsteps"><span class="jline" aria-hidden="true"><i class="jfill"></i><i class="jtick"></i></span><ol>{steps}</ol></div>'
             f'<div class="jslides" id="jslides" tabindex="0" aria-label="Farm stages">{slides}</div>'
-            f'<div class="jctl"><button class="jbtn" id="jprev" type="button" aria-label="Previous stage">‹</button><span class="jcount" id="jcount">1 / {n}</span><button class="jbtn" id="jnext" type="button" aria-label="Next stage">›</button></div></div>'
+            f'<div class="jctl"><button class="jbtn" id="jprev" type="button" aria-label="Previous stage">‹</button>'
+            f'<button class="jplay" id="jplay" type="button" aria-label="Pause journey" data-state="play"><span class="ic-pause"></span><span class="ic-play"></span></button>'
+            f'<span class="jcount" id="jcount">1 / {n}</span>'
+            f'<button class="jbtn" id="jnext" type="button" aria-label="Next stage">›</button></div></div>'
             f'</div></section>')
 
 # ---------- Android-style app shell (phones) ----------
