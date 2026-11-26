@@ -101,3 +101,55 @@
 
   const y = $('#yr'); if (y) y.textContent = new Date().getFullYear();
 })();
+
+/* ===== additions: progress bar, back-to-top, lightbox ===== */
+(() => {
+  const $ = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+
+  const bar = document.createElement('div'); bar.className = 'progress'; bar.setAttribute('aria-hidden', 'true');
+  const top = document.createElement('button'); top.className = 'totop'; top.type = 'button'; top.setAttribute('aria-label', 'Back to top'); top.textContent = '↑';
+  document.body.append(bar, top);
+  let tick = false;
+  const upd = () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${h > 0 ? Math.min(1, scrollY / h) : 0})`;
+    top.classList.toggle('show', scrollY > 700);
+    tick = false;
+  };
+  addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
+  top.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+  upd();
+
+  /* lightbox */
+  const items = $$('.gal a');
+  if (!items.length) return;
+  const lb = document.createElement('div');
+  lb.className = 'lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Photo viewer');
+  lb.innerHTML = '<button class="x" aria-label="Close">✕</button><button class="pv" aria-label="Previous">‹</button><figure><img alt=""><figcaption></figcaption></figure><button class="nx" aria-label="Next">›</button>';
+  document.body.appendChild(lb);
+  const im = $('img', lb), cap = $('figcaption', lb);
+  let i = 0;
+  const show = n => {
+    i = (n + items.length) % items.length;
+    const a = items[i];
+    im.src = a.getAttribute('href'); im.alt = a.dataset.cap || '';
+    cap.textContent = (a.dataset.cap || '').replace(/&amp;/g, '&');
+  };
+  const openLb = n => { show(n); lb.classList.add('open'); document.body.style.overflow = 'hidden'; $('.x', lb).focus(); };
+  const closeLb = () => { lb.classList.remove('open'); document.body.style.overflow = ''; };
+  items.forEach((a, n) => a.addEventListener('click', e => { e.preventDefault(); openLb(n); }));
+  $('.x', lb).addEventListener('click', closeLb);
+  $('.pv', lb).addEventListener('click', () => show(i - 1));
+  $('.nx', lb).addEventListener('click', () => show(i + 1));
+  lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+  addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLb();
+    if (e.key === 'ArrowLeft') show(i - 1);
+    if (e.key === 'ArrowRight') show(i + 1);
+  });
+  let sx = 0;
+  lb.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) show(i + (d < 0 ? 1 : -1)); });
+})();

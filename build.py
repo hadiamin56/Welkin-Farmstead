@@ -44,6 +44,7 @@ NAV = [
     ('shop', 'shop.html', 'Shop'),
     ('farm', None, 'Our farm'),
     ('seasons', 'seasons.html', 'Seasons'),
+    ('gallery', 'gallery.html', 'Gallery'),
     ('contact', 'contact.html', 'Contact'),
 ]
 FARM = [
@@ -65,6 +66,7 @@ def header(active, sub):
             cur = ' class="cur" aria-current="page"' if key == active else ''
             items += f'<a href="{href}"{cur}>{label}</a>'
     return f'''<a class="skip" href="#main">Skip to content</a>
+<div class="annc" id="annc"><div class="wrap"><span>Eid-ul-Adha Qurbani bookings are open</span><a href="{wa("Salaam Welkin Farmstead! I'd like to book an animal for Eid-ul-Adha Qurbani.")}" target="_blank" rel="noopener">Book on WhatsApp →</a></div></div>
 <header class="nav" id="nav">
   <div class="wrap nav-in">
     <a href="index.html" class="brand"><img src="assets/logo.png" alt="" width="40" height="40"><span>Welkin Farmstead</span></a>
@@ -79,9 +81,9 @@ def footer():
     return f'''<footer class="footer">
   <div class="wrap fgrid">
     <div class="fb"><img src="assets/logo.png" alt="Welkin Farmstead logo" width="56" height="56" loading="lazy"><div><b>Welkin Farmstead</b><span>Where goodness grows.</span></div></div>
-    <div><h4>Explore</h4><a href="index.html">Home</a><a href="shop.html">Farm shop</a><a href="seasons.html">Seasons</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a></div>
+    <div><h4>Explore</h4><a href="index.html">Home</a><a href="shop.html">Farm shop</a><a href="seasons.html">Seasons</a><a href="gallery.html">Gallery</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a></div>
     <div><h4>Our farm</h4>{farm}</div>
-    <div><h4>Reach us</h4><a href="tel:+917006901374">70069 01374</a><a href="mailto:waseemhajini86@gmail.com">waseemhajini86@gmail.com</a><a href="https://www.instagram.com/welkinfarmstead/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/welkinfarmstead/" target="_blank" rel="noopener">Facebook</a><span>Sopore, Kashmir 193201</span></div>
+    <div><h4>Reach us</h4><a href="tel:+917006901374">70069 01374</a><a href="mailto:waseemhajini86@gmail.com">waseemhajini86@gmail.com</a><span>Sopore, Kashmir 193201</span><div class="social">{SOCIAL}</div></div>
   </div>
   <div class="wrap fcopy">© <span id="yr">2026</span> Welkin Farmstead · Managed by Waseem Anayat Hajini</div>
 </footer>
@@ -107,6 +109,7 @@ def page(fname, title, desc, body, active='', sub='', og='hero.jpg', preload=Non
 <meta property="og:image" content="assets/photos/{og}">
 <link rel="icon" href="assets/logo.png">
 <link rel="apple-touch-icon" href="assets/logo.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -126,6 +129,73 @@ def page(fname, title, desc, body, active='', sub='', og='hero.jpg', preload=Non
     with open(os.path.join(ROOT, fname), 'w') as f:
         f.write(html)
     print('wrote', fname)
+
+
+# ---------- icons & extra components ----------
+def svg(path, vb='0 0 24 24', stroke=True):
+    a = 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"' if stroke else 'fill="currentColor"'
+    return f'<svg viewBox="{vb}" width="24" height="24" {a} aria-hidden="true">{path}</svg>'
+
+ICON = {
+    'leaf': svg('<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-5 6-8 10-10"/>'),
+    'fish': svg('<path d="M3 12c3-5 9-6 13-2l5-3v10l-5-3c-4 4-10 3-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/>'),
+    'hand': svg('<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>'),
+    'cap': svg('<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.500 6-3v-4.500"/>'),
+    'pin': svg('<path d="M12 21s7-6.200 7-11.500A7 7 0 0 0 5 9.500C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>'),
+    'phone': svg('<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>'),
+    'mail': svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'),
+    'ig': svg('<rect x="3.500" y="3.500" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".8" fill="currentColor"/>'),
+    'fb': svg('<path d="M14 8h2V5h-2.500C11 5 10 6.500 10 8.500V10H8v3h2v6h3v-6h2.300l.4-3H13V8.800c0-.5.2-.8 1-.8z"/>', stroke=False),
+    'wa': svg('<path d="M12 2a10 10 0 0 0-8.600 15.100L2 22l5-1.300A10 10 0 1 0 12 2zm0 1.800a8.200 8.200 0 1 1-4.200 15.300l-.3-.2-3 .8.8-2.900-.2-.3A8.200 8.200 0 0 1 12 3.800zM8.600 7.600c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.400s1 2.800 1.200 3c.1.200 2 3.200 5 4.400 2.400 1 2.900.8 3.400.7.600-.1 1.700-.7 1.900-1.400.2-.7.2-1.200.2-1.400-.1-.1-.3-.2-.6-.3l-1.800-.9c-.2-.1-.4-.1-.6.1l-.8 1c-.1.200-.3.2-.6.1-.3-.1-1.200-.4-2.200-1.400-.8-.7-1.400-1.600-1.500-1.900-.2-.3 0-.4.1-.6l.4-.4.3-.5v-.5l-.8-2c-.2-.5-.4-.5-.6-.5z"/>', stroke=False),
+}
+SOCIAL = (f'<a href="https://www.instagram.com/welkinfarmstead/" target="_blank" rel="noopener" aria-label="Instagram">{ICON["ig"]}</a>'
+          f'<a href="https://www.facebook.com/welkinfarmstead/" target="_blank" rel="noopener" aria-label="Facebook">{ICON["fb"]}</a>'
+          f'<a href="{wa("Salaam Welkin Farmstead! I\'d like to know more.")}" target="_blank" rel="noopener" aria-label="WhatsApp">{ICON["wa"]}</a>')
+
+MAPQ = 'Welkin+Farmstead,+Sopore,+Kashmir+193201'
+def findus(compact=False):
+    return f'''<div class="map-grid">
+  <div class="map-info">
+    <p class="eyebrow">Find us</p><h2>Visit Welkin Farmstead</h2>
+    <p class="sub">We\'re in Sopore, Kashmir — the apple town of the valley. Welkin Aquaculture is expanding in Model Town, Sopore. Message us before you come so we can guide you in.</p>
+    <ul class="info">
+      <li>{ICON["pin"]}<div><b>Address</b><span>Sopore, Jammu &amp; Kashmir 193201</span></div></li>
+      <li>{ICON["phone"]}<div><b>Call / WhatsApp</b><a href="tel:+917006901374">70069 01374</a></div></li>
+      <li>{ICON["mail"]}<div><b>Email</b><a href="mailto:waseemhajini86@gmail.com">waseemhajini86@gmail.com</a></div></li>
+    </ul>
+    <div class="actions"><a class="btn btn-green" href="https://www.google.com/maps/dir/?api=1&destination={MAPQ}" target="_blank" rel="noopener">Get directions</a><a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={MAPQ}" target="_blank" rel="noopener">Open in Maps</a></div>
+  </div>
+  <div class="map"><iframe title="Map showing Welkin Farmstead in Sopore, Kashmir" src="https://www.google.com/maps?q={MAPQ}&z=13&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+</div>'''
+
+def features():
+    data = [('leaf', 'Grown in Sopore', 'Orchards and tanks in the apple town of Kashmir.'),
+            ('fish', 'Farm-fresh trout', 'Raised in clean recirculating tanks, a short trip to your kitchen.'),
+            ('hand', 'Straight from the farm', 'Apples, fish, sheep and milk — sold directly by the people who raise them.'),
+            ('cap', 'Open to learn', 'Student farm visits: paddy harvest, threshing, winnowing and tours.')]
+    return '<div class="feats">' + ''.join(f'<div class="feat"><span class="ic">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in data) + '</div>'
+
+FAQ = [
+    ('How do I order?', "Tap any Enquire or Order button — WhatsApp opens with your message ready. We reply with availability, price and how you'll receive your order."),
+    ('Do you take Qurbani bookings?', 'Yes. Eid-ul-Adha Qurbani bookings are taken ahead of time. Message us the breed (Dumba, Merino or bull), approximate weight and budget, and we\'ll share options.'),
+    ('When is each fruit available?', 'See our Seasons page for typical Kashmir timing. It shifts with the weather, so message us for exact availability.'),
+    ('Can my school or college visit?', 'Yes — student groups are welcome for paddy harvesting, threshing, winnowing and a farm tour. Fill in the form on the Farm visits page.'),
+    ('Where are you located?', 'Welkin Farmstead is in Sopore, Kashmir 193201. Welkin Aquaculture is expanding in Model Town, Sopore.'),
+    ('Are you hiring?', 'We hire for farm operations, sales, logistics, maintenance and supervision. See the Careers page and apply on WhatsApp.'),
+]
+def faq():
+    return '<div class="faq">' + ''.join(f'<details><summary>{q}</summary><p>{a}</p></details>' for q, a in FAQ) + '</div>'
+
+def follow_band():
+    return (f'<section class="sec"><div class="wrap"><div class="follow"><div><h2>Follow the farm</h2><p>Daily updates, harvests and new arrivals on Instagram and Facebook.</p></div>'
+            f'<div class="social big">{SOCIAL}</div></div></div></section>')
+
+GALLERY = [('hero.jpg', 'Aerial view of the farm'), ('orchard.jpg', 'In the orchard'), ('harvest.jpg', 'Fresh harvest'), ('tanks-wide.jpg', 'Welkin Aquaculture'),
+           ('livestock.jpg', 'Sheep and cattle'), ('paddy.jpg', 'Student farm visit'), ('cherries.jpg', 'Cherries'), ('trout.jpg', 'Rainbow trout'),
+           ('merino.jpg', 'Merino sheep'), ('nectarines.jpg', 'Ruby Nectarines'), ('bull.jpg', 'Bulls'), ('walnuts.jpg', 'Walnuts &amp; kiwi')]
+def gallery_grid():
+    return '<div class="gal">' + ''.join(
+        f'<a href="assets/photos/{f}" data-cap="{c}"><span class="gimg">{img(f, c, "(min-width:980px) 360px, 50vw")}</span><span class="gcap">{c}</span></a>' for f, c in GALLERY) + '</div>'
 
 # ---------- components ----------
 def phead(crumbs, h1, lead, banner_file, banner_alt, ctas=''):
@@ -212,13 +282,15 @@ def home():
     featured = sec(sh('Farm shop', 'Fresh from the farm', 'A few things we\'re known for. See everything in the shop.') +
                    '<div class="cards">' + ''.join(card(PRODUCTS[i]) for i in (0, 1, 4, 5)) + '</div>' +
                    '<p class="more"><a class="btn btn-ghost" href="shop.html">See all products →</a></p>')
+    why = sec(sh('Why Welkin', 'Goodness you can trace') + features())
     farm = sec(sh('Our farm', 'Four ways we farm') + tiles(), tint=True)
     season = sec(sh('Seasons', "In season right now", 'Typical Kashmir timing — message us for exact availability.') +
                  '<ul class="slist" id="slist" aria-live="polite"></ul><p class="more"><a class="btn btn-ghost" href="seasons.html">Full season calendar →</a></p>')
     visit = sec(split(
         '<p class="eyebrow">Farm visits</p><h2>A day in the fields</h2><p class="sub">Schools and colleges are welcome to spend a day with us — harvesting, threshing, winnowing and touring the orchard, herd and trout tanks.</p><p><a class="btn btn-green" href="visits.html">Plan a visit</a></p>',
         ph('paddy.jpg', 'Students on a Welkin farm visit', '', None, '(min-width:980px) 560px, 100vw')), tint=True)
-    return hero + featured + farm + season + visit + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
+    find = sec(findus())
+    return hero + featured + why + farm + season + visit + find + follow_band() + band('Join the Welkin team', "We're hiring for farm operations, sales, logistics, maintenance and supervision.", '<a class="btn btn-light" href="careers.html">See open roles</a>')
 
 def shop():
     chips = '<div class="chips" role="group" aria-label="Filter products"><button class="on" data-f="all">All</button><button data-f="fruit">Fruit &amp; nuts</button><button data-f="fish">Fish</button><button data-f="live">Livestock</button></div>'
@@ -309,6 +381,9 @@ def careers():
         f'<div class="role"><div><h3>{t}</h3><p>{d}</p></div>{wabtn(f"Salaam Welkin Farmstead! I am interested in the {t} role. My name is ___ and I have ___ experience.", "Apply", "btn btn-ghost btn-sm")}</div>' for t, d in roles) + '</div>'
     return sec('<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> <span>/</span> <b>Careers</b></nav><h1 class="ph1">Join the Welkin team</h1><p class="lead">We\'re growing. Welkin Farmstead is hiring across farm operations, sales, logistics, maintenance and supervision. Pick a role and apply on WhatsApp.</p>' + cards)
 
+def gallery():
+    return sec('<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> <span>/</span> <b>Gallery</b></nav><h1 class="ph1">Life at Welkin</h1><p class="lead">Orchards, harvests, trout tanks, flocks and student days. Tap a photo to view it full size.</p>' + gallery_grid()) + follow_band()
+
 def contact():
     return sec(split(
         '<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> <span>/</span> <b>Contact</b></nav><h1 class="ph1">Order or enquire</h1><p class="lead">Choose what you\'re after and send. WhatsApp opens with your message ready.</p>'
@@ -322,6 +397,9 @@ def contact():
 <label class="fld"><span>Notes (quantity, date, city)</span><textarea name="note" rows="3" placeholder="e.g. 2 boxes of apples, deliver to Srinagar"></textarea></label>
 <button class="btn btn-green wide" type="submit">Send on WhatsApp</button></form>'''))
 
+def contact_extra():
+    return sec(findus(), tint=True) + sec(sh('FAQ', 'Good to know') + faq())
+
 def notfound():
     return sec('<div class="nf"><p class="eyebrow">404</p><h1 class="ph1">This page wandered off.</h1><p class="lead">The page you\'re looking for isn\'t here. Let\'s get you back to the farm.</p><p class="actions"><a class="btn btn-green" href="index.html">Go home</a><a class="btn btn-ghost" href="shop.html">Farm shop</a></p></div>')
 
@@ -334,7 +412,8 @@ PAGES = [
     ('visits.html', 'Farm visits', 'Educational farm visits for students at Welkin Farmstead: paddy harvesting, threshing, winnowing and farm tours.', visits, 'farm', 'visits', 'paddy-800.jpg'),
     ('seasons.html', 'Seasons', 'A seasonal guide to what is ready when at Welkin Farmstead in Kashmir: cherries, apricots, nectarines, apples, walnuts, kiwi and more.', seasons, 'seasons', '', None),
     ('careers.html', 'Careers', 'Jobs at Welkin Farmstead: farm operations, sales, logistics, maintenance and supervision roles in Sopore.', careers, 'careers', '', None),
-    ('contact.html', 'Contact', 'Order or enquire at Welkin Farmstead, Sopore, Kashmir. WhatsApp 70069 01374.', contact, 'contact', '', None),
+    ('gallery.html', 'Gallery', 'Photos from Welkin Farmstead in Sopore, Kashmir: orchards, fresh harvest, rainbow trout tanks, sheep, cattle and student visits.', gallery, 'gallery', '', None),
+    ('contact.html', 'Contact', 'Order or enquire at Welkin Farmstead, Sopore, Kashmir. WhatsApp 70069 01374. Find us on the map.', lambda: contact() + contact_extra(), 'contact', '', None),
     ('404.html', 'Page not found', 'Page not found.', notfound, '', '', None),
 ]
 
