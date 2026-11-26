@@ -154,23 +154,58 @@
   lb.addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) show(i + (d < 0 ? 1 : -1)); });
 })();
 
-/* ===== timeline progress ===== */
+
+/* ===== journey: winding road drawn through the stops, travelled as you scroll ===== */
 (() => {
-  const tl = document.getElementById('tl');
-  if (!tl) return;
-  const items = [...tl.querySelectorAll('.tl-item')];
-  let busy = false;
-  const upd = () => {
-    const r = tl.getBoundingClientRect(), vh = innerHeight, mark = vh * .55;
-    const p = Math.max(0, Math.min(1, (mark - r.top) / r.height));
-    tl.style.setProperty('--p', (p * 100).toFixed(1));
-    items.forEach(it => {
-      const n = it.querySelector('.tl-node').getBoundingClientRect();
-      it.classList.toggle('on', n.top + n.height / 2 < mark);
+  const jr = document.getElementById('jr');
+  if (!jr) return;
+  const svg = jr.querySelector('.road'), paths = [...svg.querySelectorAll('path')];
+  const rp = svg.querySelector('.rp'), trav = svg.querySelector('.trav');
+  const stops = [...jr.querySelectorAll('.stop')];
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let pts = [], L = 1, busy = false;
+
+  const build = () => {
+    const jb = jr.getBoundingClientRect(), W = jb.width, H = jb.height;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    pts = stops.map(s => { const r = s.querySelector('.pin').getBoundingClientRect(); return { x: r.left + r.width / 2 - jb.left, y: r.top + r.height / 2 - jb.top }; });
+    const mob = innerWidth <= 760, A = mob ? 12 : Math.min(62, W * .055);
+    const wp = [{ x: pts[0].x, y: Math.max(0, pts[0].y - 130) }];
+    pts.forEach((p, i) => {
+      wp.push(p);
+      const n = pts[i + 1];
+      if (n) wp.push({ x: (p.x + n.x) / 2 + (i % 2 ? 1 : -1) * A, y: (p.y + n.y) / 2 });
     });
-    busy = false;
+    const last = pts[pts.length - 1];
+    wp.push({ x: last.x, y: Math.min(H, last.y + 130) });
+    let d = `M${wp[0].x.toFixed(1)} ${wp[0].y.toFixed(1)}`;
+    for (let i = 0; i < wp.length - 1; i++) {
+      const p0 = wp[i - 1] || wp[i], p1 = wp[i], p2 = wp[i + 1], p3 = wp[i + 2] || p2;
+      const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+      const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+      d += ` C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+    paths.forEach(p => p.setAttribute('d', d));
+    L = rp.getTotalLength();
+    rp.style.strokeDasharray = L;
+    update();
   };
-  addEventListener('scroll', () => { if (!busy) { busy = true; requestAnimationFrame(upd); } }, { passive: true });
-  addEventListener('resize', upd);
-  upd();
+
+  const update = () => {
+    busy = false;
+    const jb = jr.getBoundingClientRect(), mark = innerHeight * .6;
+    let p = still ? 1 : Math.max(0, Math.min(1, (mark - jb.top) / jb.height));
+    rp.style.strokeDashoffset = L * (1 - p);
+    const pt = rp.getPointAtLength(L * p);
+    trav.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
+    stops.forEach((s, i) => s.classList.toggle('on', still || pts[i].y <= pt.y + 6));
+  };
+
+  if (still) jr.classList.add('static');
+  const tick = () => { if (!busy) { busy = true; requestAnimationFrame(update); } };
+  addEventListener('scroll', tick, { passive: true });
+  addEventListener('resize', build);
+  addEventListener('load', build);
+  if ('ResizeObserver' in window) new ResizeObserver(build).observe(jr);
+  build();
 })();
