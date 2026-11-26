@@ -2,88 +2,77 @@
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const WA = '917006901374';
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* nav */
-  const nav = $('#nav'), links = $('#links'), burger = $('#burger');
-  const onScroll = () => nav.classList.toggle('stuck', scrollY > 60);
-  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  const links = $('#links'), burger = $('#burger');
   burger.addEventListener('click', () => {
     const o = links.classList.toggle('open'); burger.setAttribute('aria-expanded', o);
   });
   links.addEventListener('click', e => { if (e.target.closest('a')) { links.classList.remove('open'); burger.setAttribute('aria-expanded', false); } });
 
-  /* photo slots: real photos live in assets/photos/<name>.jpg */
+  /* photo slots — real photos go in assets/photos/<name> */
   $$('.ph').forEach(f => {
     const file = f.dataset.f, cap = f.dataset.cap || '';
-    f.innerHTML = `<div class="tag">Photo slot<br>assets/photos/${file}</div>` +
-      `<img src="assets/photos/${file}" alt="${cap.replace(/&amp;/g, '&')} — Welkin Farmstead" loading="lazy" decoding="async" onerror="this.remove()">` +
-      (cap ? `<figcaption>${cap}</figcaption>` : '');
+    f.innerHTML = `<span class="nophoto">photo: ${file}</span>` +
+      `<img src="assets/photos/${file}" alt="${cap} — Welkin Farmstead" loading="lazy" decoding="async" onerror="this.remove()">` +
+      (cap ? `<span class="cap">${cap}</span>` : '');
+    const img = $('img', f);
+    img.addEventListener('load', () => { const n = $('.nophoto', f); if (n) n.remove(); });
   });
-  // hero photo
-  const hb = $('#heroBg'), hi = new Image();
-  hi.alt = 'Welkin Farmstead orchards in Sopore, Kashmir'; hi.decoding = 'async';
-  hi.onload = () => hb.appendChild(hi);
-  hi.src = 'assets/photos/hero.jpg';
 
-  /* reveal */
+  /* fade-in */
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { threshold: .12, rootMargin: '0px 0px -5% 0px' });
-  $$('.reveal').forEach(el => io.observe(el));
+  }), { threshold: .1 });
+  $$('.card,.steps li,.band,.form,.season-box,.facts').forEach(el => { el.classList.add('fade'); io.observe(el); });
 
-  /* hero parallax */
-  if (!reduce) {
-    let t = false;
-    addEventListener('scroll', () => {
-      if (t || scrollY > innerHeight * 1.2) return; t = true;
-      requestAnimationFrame(() => { hb.style.transform = `translateY(${scrollY * .28}px)`; t = false; });
-    }, { passive: true });
-  }
+  /* tabs */
+  const tabs = $$('.tabs button');
+  tabs.forEach(b => b.addEventListener('click', () => {
+    tabs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-selected', on); });
+    $$('.pane').forEach(p => { const on = p.id === b.dataset.t; p.classList.toggle('on', on); p.hidden = !on; });
+  }));
 
-  /* manifesto word-by-word */
-  const mf = $('#mf');
-  mf.innerHTML = mf.textContent.trim().split(/\s+/).map(w => `<span class="w">${w}</span>`).join(' ');
-  const words = $$('.w', mf);
-  const fill = () => {
-    const r = mf.getBoundingClientRect(), vh = innerHeight;
-    const p = Math.min(1, Math.max(0, (vh * .85 - r.top) / (r.height + vh * .35)));
-    const n = Math.round(p * words.length);
-    words.forEach((w, i) => w.classList.toggle('on', i < n));
-  };
-  addEventListener('scroll', fill, { passive: true }); addEventListener('resize', fill); fill();
-
-  /* seasons gantt */
-  const M = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-  // name, note, from, to (0-indexed), type
+  /* seasons */
+  const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const CROPS = [
-    ['Seedlings', 'Vegetables & flowers', 2, 4, ''],
-    ['Cherries', 'Premium · Cordia · Regina', 4, 6, 'fruit'],
-    ['Apricots', '', 5, 6, 'fruit'],
-    ['Ruby Nectarines', '', 6, 7, 'fruit'],
-    ['Pears', '', 7, 9, 'fruit'],
-    ['Apples', 'High-density orchard', 7, 10, 'fruit'],
-    ['Walnuts', '', 8, 9, 'fruit'],
-    ['Kiwi', '', 9, 10, 'fruit'],
-    ['Paddy visits', 'Student field days', 8, 9, ''],
-    ['Rainbow trout', 'Welkin Aquaculture', 0, 11, 'all'],
-    ['Fresh milk', 'From our herd', 0, 11, 'all'],
+    ['Cherries', 'Premium · Cordia · Regina', 4, 6],
+    ['Apricots', '', 5, 6],
+    ['Ruby Nectarines', '', 6, 7],
+    ['Pears', '', 7, 9],
+    ['Apples', 'High-density orchard', 7, 10],
+    ['Walnuts', '', 8, 9],
+    ['Kiwi', '', 9, 10],
+    ['Seedlings', 'Vegetables & flowers', 2, 4],
+    ['Paddy field visits', 'Student days', 8, 9],
+    ['Rainbow trout', 'Welkin Aquaculture', 0, 11],
+    ['Fresh milk', 'From our herd', 0, 11],
   ];
-  const now = new Date().getMonth(), g = $('#gantt');
-  g.innerHTML = `<div class="g-row head"><span></span>${M.map((m, i) => `<span class="${i === now ? 'nowm' : ''}">${m}</span>`).join('')}</div>` +
-    CROPS.map(c => `<div class="g-row"><div class="g-lab">${c[0]}${c[1] ? `<small>${c[1]}</small>` : ''}</div><div class="grid"></div><div class="g-bar ${c[4]}" style="grid-column:${c[2] + 2}/${c[3] + 3}"></div></div>`).join('') +
-    `<div class="g-now" style="left:calc(210px + (100% - 210px) * ${now} / 12);width:calc((100% - 210px) / 12)"></div>`;
-  const mq = matchMedia('(max-width:600px)');
-  const fixLabel = () => { const w = mq.matches ? '150px' : '210px'; g.querySelectorAll('.g-row').forEach(r => r.style.gridTemplateColumns = `${w} repeat(12,1fr)`);
-    const n = $('.g-now', g); n.style.left = `calc(${w} + (100% - ${w}) * ${now} / 12)`; n.style.width = `calc((100% - ${w}) / 12)`; };
-  fixLabel(); mq.addEventListener('change', fixLabel);
+  const now = new Date().getMonth(), mEl = $('#months'), out = $('#slist');
+  M.forEach((m, i) => {
+    const b = document.createElement('button');
+    b.textContent = m; b.setAttribute('role', 'tab');
+    if (i === now) b.classList.add('now');
+    b.addEventListener('click', () => show(i));
+    mEl.appendChild(b);
+  });
+  function show(i) {
+    $$('button', mEl).forEach((b, j) => { b.classList.toggle('sel', j === i); b.setAttribute('aria-selected', j === i); });
+    const items = CROPS.filter(c => i >= c[2] && i <= c[3]);
+    out.innerHTML = items.map(c => {
+      const all = c[2] === 0 && c[3] === 11;
+      const tag = all ? '<span class="tag all">All year</span>' : i === c[2] ? '<span class="tag">Just in</span>' : i === c[3] ? '<span class="tag last">Last call</span>' : '<span class="tag">In season</span>';
+      return `<li><div><b>${c[0]}</b>${c[1] ? `<small>${c[1]}</small>` : ''}</div>${tag}</li>`;
+    }).join('') || `<li class="empty">Nothing listed for ${FULL[i]}.</li>`;
+  }
+  show(now);
 
-  /* order slip */
-  const ITEMS = ['Apples', 'Cherries', 'Ruby Nectarines', 'Apricots / Pears', 'Kiwi', 'Walnuts', 'Rainbow trout', 'Fresh milk', 'Qurbani animal', 'Seedlings', 'A farm visit', 'Something else'];
-  $('#opts').innerHTML = ITEMS.map(i => `<label class="opt"><input type="checkbox" value="${i}"><i>×</i>${i}</label>`).join('');
-  $('#slipNo').textContent = 'No. ' + String(Math.floor(Math.random() * 9000) + 1000);
+  /* WhatsApp + order form */
   const wa = t => `https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
   $$('[data-wa]').forEach(a => { a.href = wa(a.dataset.wa); a.target = '_blank'; a.rel = 'noopener'; });
+  const ITEMS = ['Apples', 'Cherries', 'Ruby Nectarines', 'Apricots / Pears', 'Kiwi', 'Walnuts', 'Rainbow trout', 'Fresh milk', 'Dumba sheep', 'Merino sheep', 'Bulls', 'Seedlings', 'A farm visit'];
+  $('#opts').innerHTML = ITEMS.map(i => `<label class="opt"><input type="checkbox" value="${i}"><span>${i}</span></label>`).join('');
   $('#order').addEventListener('submit', e => {
     e.preventDefault();
     const f = e.target, name = f.name.value.trim(), note = f.note.value.trim();
