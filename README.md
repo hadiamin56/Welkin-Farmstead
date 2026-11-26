@@ -1,12 +1,17 @@
 # Welkin Farmstead — Where Goodness Grows
 
-Static website, no build step. Publish directory = repo root.
+Multi-page static website (no framework). Publish directory = repo root, no build command needed on Netlify.
 
-## Add your real HD photos
-Put JPGs in `assets/photos/` with these exact names (≥ 1600px wide). Missing ones show a soft colour block; present ones replace it automatically.
+Pages: `index` · `shop` · `orchard` · `aquaculture` · `livestock` · `visits` · `seasons` · `careers` · `contact` · `404`
 
-`hero.jpg` (large hero), `trout.jpg`, `sheep.jpg`, `orchard.jpg`, `cherries.jpg`, `nectarines.jpg`, `walnuts.jpg`, `merino.jpg`, `bull.jpg`, `tanks.jpg`, `paddy.jpg`
+## Editing
+The `.html` pages are generated from `build.py` so the header/footer stay identical everywhere.
+To change text, products or links: edit `build.py`, then run
 
-## Edit
-- WhatsApp number: `WA` in `script.js`
-- Season list: `CROPS` in `script.js`
+    python3 build.py
+
+(needs Pillow: `pip install pillow`). Commit the regenerated pages.
+
+- WhatsApp number: `WA_NUM` in `build.py` and `WA` in `script.js`
+- Season calendar: `CROPS` in `script.js`
+- Photos: `assets/photos/` (800px mobile versions are generated automatically by the build)

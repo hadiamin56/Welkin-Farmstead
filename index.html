@@ -2,58 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Welkin Farmstead — Where Goodness Grows · Sopore, Kashmir</title>
-<meta name="description" content="Welkin Farmstead, Sopore, Kashmir: high-density apple orchards, cherries, nectarines, walnuts, farm-fresh rainbow trout, Dumba and Merino sheep, Qurbani bookings and student farm visits.">
+<meta name="description" content="Welkin Farmstead in Sopore, Kashmir: apple orchards, rainbow trout, sheep, bulls, milk, Qurbani bookings and student farm visits.">
 <meta name="theme-color" content="#1f5a3a">
-<meta property="og:title" content="Welkin Farmstead — Where Goodness Grows">
-<meta property="og:description" content="Orchards, rainbow trout, livestock and farm visits from Sopore, Kashmir.">
+<meta property="og:title" content="Welkin Farmstead — Where Goodness Grows · Sopore, Kashmir">
+<meta property="og:description" content="Welkin Farmstead in Sopore, Kashmir: apple orchards, rainbow trout, sheep, bulls, milk, Qurbani bookings and student farm visits.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="assets/photos/hero.jpg">
 <link rel="icon" href="assets/logo.png">
+<link rel="apple-touch-icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Farm","name":"Welkin Farmstead","slogan":"Where Goodness Grows","telephone":"+91-7006901374","email":"waseemhajini86@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Sopore","addressRegion":"Jammu & Kashmir","postalCode":"193201","addressCountry":"IN"},"sameAs":["https://www.instagram.com/welkinfarmstead/","https://www.facebook.com/welkinfarmstead/"]}
-</script>
-</head>
-<body>
 
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Farm","name":"Welkin Farmstead","slogan":"Where Goodness Grows","telephone":"+91-7006901374","email":"waseemhajini86@gmail.com","image":"assets/photos/hero.jpg","address":{"@type":"PostalAddress","addressLocality":"Sopore","addressRegion":"Jammu & Kashmir","postalCode":"193201","addressCountry":"IN"},"sameAs":["https://www.instagram.com/welkinfarmstead/","https://www.facebook.com/welkinfarmstead/"]}</script>
+</head>
+<body data-page="home">
+<a class="skip" href="#main">Skip to content</a>
 <header class="nav" id="nav">
   <div class="wrap nav-in">
-    <a href="#top" class="brand"><img src="assets/logo.png" alt="" width="40" height="40"><span>Welkin Farmstead</span></a>
-    <nav class="links" id="links" aria-label="Main">
-      <a href="#shop">Shop</a>
-      <a href="#farm">Our farm</a>
-      <a href="#seasons">Seasons</a>
-      <a href="#visit">Farm visits</a>
-      <a href="#contact">Contact</a>
-    </nav>
-    <a class="btn btn-sm btn-green nav-cta" href="#contact">Order</a>
-    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+    <a href="index.html" class="brand"><img src="assets/logo.png" alt="" width="40" height="40"><span>Welkin Farmstead</span></a>
+    <nav class="links" id="links" aria-label="Main"><a href="index.html" class="cur" aria-current="page">Home</a><a href="shop.html">Shop</a><div class="dd"><button type="button" aria-expanded="false" aria-haspopup="true">Our farm<svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><div class="dd-menu"><a href="orchard.html">Orchard</a><a href="aquaculture.html">Aquaculture</a><a href="livestock.html">Livestock</a><a href="visits.html">Farm visits</a></div></div><a href="seasons.html">Seasons</a><a href="contact.html">Contact</a></nav>
+    <a class="btn btn-sm btn-green nav-cta" href="contact.html">Order</a>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="links"><i></i><i></i></button>
   </div>
 </header>
-
-<main id="top">
-
-<!-- HERO -->
+<main id="main">
 <section class="hero">
   <div class="wrap hero-in">
     <div class="hero-copy">
       <p class="pill"><span></span> Sopore, Kashmir · 193201</p>
       <h1>Where goodness grows.</h1>
       <p class="lead">Welkin Farmstead is a family-run agricultural and aquaculture farm. High-density apple orchards, farm-fresh rainbow trout, sheep, bulls and milk — raised in Sopore, sold directly by us.</p>
-      <div class="actions">
-        <a class="btn btn-green" href="#shop">Browse the farm shop</a>
-        <a class="btn btn-ghost" data-wa="Salaam Welkin Farmstead! I'd like to know more about your farm products.">Chat on WhatsApp</a>
-      </div>
+      <div class="actions"><a class="btn btn-green" href="shop.html">Browse the farm shop</a><a class="btn btn-ghost" href="https://wa.me/917006901374?text=Salaam%20Welkin%20Farmstead%21%20I%27d%20like%20to%20know%20more%20about%20your%20farm%20products." target="_blank" rel="noopener">Chat on WhatsApp</a></div>
     </div>
     <div class="collage">
-      <figure class="ph a" data-f="hero.jpg" data-cap="Welkin orchards, Sopore" style="--t:#cfe0c4"></figure>
-      <figure class="ph b" data-f="trout.jpg" data-cap="Rainbow trout" style="--t:#bcd6d9"></figure>
-      <figure class="ph c" data-f="sheep.jpg" data-cap="Dumba sheep" style="--t:#e6d9bd"></figure>
+      <figure class="ph a"><img src="assets/photos/hero.jpg" srcset="assets/photos/hero-800.jpg 800w, assets/photos/hero.jpg 1600w" sizes="(min-width:980px) 520px, 100vw" alt="Welkin orchards, Sopore" width="1600" height="900" fetchpriority="high"><span class="cap">Welkin orchards, Sopore</span></figure>
+      <figure class="ph b"><img src="assets/photos/trout.jpg" srcset="assets/photos/trout-800.jpg 800w, assets/photos/trout.jpg 1102w" sizes="(min-width:980px) 260px, 50vw" alt="Rainbow trout" width="1102" height="640" loading="lazy" decoding="async"><span class="cap">Rainbow trout</span></figure>
+      <figure class="ph c"><img src="assets/photos/sheep.jpg" alt="Dumba sheep" width="601" height="451" loading="lazy" decoding="async"><span class="cap">Dumba sheep</span></figure>
     </div>
   </div>
   <div class="wrap facts">
@@ -62,191 +50,18 @@
     <div><b>Dumba &amp; Merino</b><span>sheep, plus bulls and milk</span></div>
     <div><b>Open farm</b><span>field visits for students</span></div>
   </div>
-</section>
-
-<!-- SHOP -->
-<section class="sec" id="shop">
-  <div class="wrap">
-    <header class="sh">
-      <p class="eyebrow">Farm shop</p>
-      <h2>What we're offering</h2>
-      <p class="sub">Tap Enquire on anything and WhatsApp opens with the message ready — we'll reply with availability and rates.</p>
-    </header>
-    <div class="cards">
-      <article class="card">
-        <figure class="ph" data-f="orchard.jpg" data-cap="Apples" style="--t:#e9b7ab"></figure>
-        <div class="cb"><h3>Apples</h3><p>From our high-density orchard blocks.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about apples — availability and rates, please.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="cherries.jpg" data-cap="Cherries" style="--t:#d9a1ad"></figure>
-        <div class="cb"><h3>Cherries</h3><p>Premium, Cordia and Regina varieties.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about cherries (Premium / Cordia / Regina) — availability and rates, please.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="nectarines.jpg" data-cap="Ruby Nectarines" style="--t:#f0c3a2"></figure>
-        <div class="cb"><h3>Ruby Nectarines</h3><p>Juicy stone fruit with ruby-red flesh.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about Ruby Nectarines — availability and rates, please.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="walnuts.jpg" data-cap="Walnuts" style="--t:#d8c3a0"></figure>
-        <div class="cb"><h3>Walnuts &amp; kiwi</h3><p>Autumn harvest, straight from the farm.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about walnuts and kiwi — availability and rates, please.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="trout.jpg" data-cap="Rainbow trout" style="--t:#b6d3d6"></figure>
-        <div class="cb"><h3>Rainbow trout</h3><p>Farm-fresh from Welkin Aquaculture.</p><a class="link" data-wa="Salaam Welkin Aquaculture! I'd like to order fresh rainbow trout. Please share availability and rates.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="sheep.jpg" data-cap="Dumba sheep" style="--t:#e2d6b8"></figure>
-        <div class="cb"><h3>Dumba sheep</h3><p>Hardy fat-tailed sheep. Qurbani bookings open.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about Dumba sheep (Qurbani). Please share weights and rates.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="merino.jpg" data-cap="Merino sheep" style="--t:#dad5c8"></figure>
-        <div class="cb"><h3>Merino sheep</h3><p>Fine-wool breed, raised on the farm.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about Merino sheep. Please share details and rates.">Enquire →</a></div>
-      </article>
-      <article class="card">
-        <figure class="ph" data-f="bull.jpg" data-cap="Bulls" style="--t:#cdb7a0"></figure>
-        <div class="cb"><h3>Bulls</h3><p>Healthy animals for Qurbani and farm use.</p><a class="link" data-wa="Salaam Welkin Farmstead! I'd like to enquire about bulls (Qurbani / farm). Please share details and rates.">Enquire →</a></div>
-      </article>
-    </div>
-    <p class="also">Also from the farm: <b>pears</b> · <b>apricots</b> · <b>fresh milk</b> · <b>vegetable &amp; flower seedlings</b></p>
-  </div>
-</section>
-
-<!-- FARM TABS -->
-<section class="sec tint" id="farm">
-  <div class="wrap">
-    <header class="sh">
-      <p class="eyebrow">Our farm</p>
-      <h2>Four ways we farm</h2>
-    </header>
-    <div class="tabs" role="tablist" aria-label="Farm areas">
-      <button role="tab" class="on" data-t="t1" aria-selected="true">Orchard</button>
-      <button role="tab" data-t="t2" aria-selected="false">Aquaculture</button>
-      <button role="tab" data-t="t3" aria-selected="false">Livestock</button>
-      <button role="tab" data-t="t4" aria-selected="false">Fields</button>
-    </div>
-
-    <div class="pane on" id="t1" role="tabpanel">
-      <div class="pane-txt">
-        <h3>High-density orchards</h3>
-        <p>Closely planted, trellised trees give earlier fruit and easier picking. We grow apples, pears, Ruby Nectarines, apricots, cherries (Premium, Cordia, Regina), kiwi and walnuts — and raise vegetable and flower seedlings.</p>
-        <ul class="ticks"><li>Apples &amp; pears</li><li>Cherries, apricots, nectarines</li><li>Kiwi &amp; walnuts</li><li>Seedlings for your garden</li></ul>
-      </div>
-      <figure class="ph" data-f="orchard.jpg" data-cap="Orchard, Sopore" style="--t:#cfe0c4"></figure>
-    </div>
-
-    <div class="pane" id="t2" role="tabpanel" hidden>
-      <div class="pane-txt">
-        <h3>Welkin Aquaculture</h3>
-        <p>Rainbow trout raised in a Recirculating Aquaculture System, now expanding in Model Town, Sopore. Water is filtered, balanced and re-oxygenated, then reused — so the fish stay healthy and the journey to your kitchen stays short.</p>
-        <ul class="ticks"><li>Clean, controlled tanks</li><li>Uses far less water than open ponds</li><li>Fresh trout, straight from the farm</li></ul>
-        <a class="btn btn-green btn-sm" data-wa="Salaam Welkin Aquaculture! I'd like to order fresh rainbow trout. Please share availability and rates.">Order fresh trout</a>
-      </div>
-      <figure class="ph" data-f="tanks.jpg" data-cap="Welkin Aquaculture" style="--t:#bcd6d9"></figure>
-    </div>
-
-    <div class="pane" id="t3" role="tabpanel" hidden>
-      <div class="pane-txt">
-        <h3>Livestock &amp; dairy</h3>
-        <p>Fresh milk, bulls and sheep — including Dumba and Merino. Eid-ul-Adha Qurbani spots fill early, so we take bookings ahead of time.</p>
-        <ul class="ticks"><li>Dumba &amp; Merino sheep</li><li>Bulls</li><li>Fresh milk</li><li>Qurbani bookings</li></ul>
-        <a class="btn btn-green btn-sm" data-wa="Salaam Welkin Farmstead! I'd like to book an animal for Eid-ul-Adha Qurbani. Please share breeds, weights and rates.">Book Qurbani</a>
-      </div>
-      <figure class="ph" data-f="merino.jpg" data-cap="Our flock" style="--t:#e6d9bd"></figure>
-    </div>
-
-    <div class="pane" id="t4" role="tabpanel" hidden>
-      <div class="pane-txt">
-        <h3>Paddy fields &amp; learning</h3>
-        <p>Students join us in the paddy fields to harvest, thresh and winnow rice by hand — a day of real agriculture, not a textbook.</p>
-        <ul class="ticks"><li>Paddy harvesting</li><li>Threshing &amp; winnowing</li><li>Orchard and tank tour</li></ul>
-        <a class="btn btn-green btn-sm" href="#visit">Plan a visit</a>
-      </div>
-      <figure class="ph" data-f="paddy.jpg" data-cap="Student farm visit" style="--t:#e8d9a6"></figure>
-    </div>
-  </div>
-</section>
-
-<!-- SEASONS -->
-<section class="sec" id="seasons">
-  <div class="wrap seasons-in">
-    <header class="sh">
-      <p class="eyebrow">Seasons</p>
-      <h2>What's good right now</h2>
-      <p class="sub">Typical Kashmir timing — it moves with the weather, so message us for exact availability.</p>
-    </header>
-    <div class="season-box">
-      <div class="months" id="months" role="tablist" aria-label="Month"></div>
-      <ul class="slist" id="slist" aria-live="polite"></ul>
-    </div>
-  </div>
-</section>
-
-<!-- VISIT -->
-<section class="sec tint" id="visit">
-  <div class="wrap split">
-    <div>
-      <p class="eyebrow">Farm visits</p>
-      <h2>A day in the paddy fields</h2>
-      <p class="sub">Schools and colleges are welcome. Tell us the group size and a preferred date and we'll plan the day.</p>
-      <a class="btn btn-green" data-wa="Salaam Welkin Farmstead! We'd like to arrange an educational farm visit for students. Please share dates and details.">Request a visit</a>
-      <figure class="ph vis" data-f="paddy.jpg" data-cap="Student farm visit" style="--t:#e8d9a6"></figure>
-    </div>
-    <ol class="steps">
-      <li><b>1</b><div><h3>Harvest</h3><p>Cut ripened paddy by hand in the field.</p></div></li>
-      <li><b>2</b><div><h3>Thresh</h3><p>Separate the grain from the stalk the traditional way.</p></div></li>
-      <li><b>3</b><div><h3>Winnow</h3><p>Let the wind carry the husk away.</p></div></li>
-      <li><b>4</b><div><h3>Tour</h3><p>Walk the orchard, meet the herd and see the trout tanks.</p></div></li>
-    </ol>
-  </div>
-</section>
-
-<!-- JOBS -->
-<section class="sec" id="jobs">
-  <div class="wrap">
-    <div class="band">
-      <div>
-        <h2>Join the Welkin team</h2>
-        <p>We're hiring for farm operations, sales, logistics, maintenance and supervision.</p>
-      </div>
-      <a class="btn btn-light" data-wa="Salaam Welkin Farmstead! I'm interested in a job opportunity. My name is ___ and I'd like to apply for ___.">Apply on WhatsApp</a>
-    </div>
-  </div>
-</section>
-
-<!-- CONTACT -->
-<section class="sec tint" id="contact">
-  <div class="wrap split">
-    <div>
-      <p class="eyebrow">Contact</p>
-      <h2>Order or enquire</h2>
-      <p class="sub">Choose what you're after and send. WhatsApp opens with your message ready.</p>
-      <ul class="clist">
-        <li><span>WhatsApp / phone</span><a href="tel:+917006901374">70069 01374</a></li>
-        <li><span>Email</span><a href="mailto:waseemhajini86@gmail.com">waseemhajini86@gmail.com</a></li>
-        <li><span>Location</span><b>Sopore, Kashmir 193201</b></li>
-        <li><span>Social</span><b><a href="https://www.instagram.com/welkinfarmstead/" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.facebook.com/welkinfarmstead/" target="_blank" rel="noopener">Facebook</a></b></li>
-      </ul>
-    </div>
-    <form class="form" id="order" autocomplete="on">
-      <label class="fld"><span>Your name</span><input name="name" type="text" autocomplete="name" placeholder="Your name"></label>
-      <fieldset><legend>I'm interested in</legend><div class="opts" id="opts"></div></fieldset>
-      <label class="fld"><span>Notes (quantity, date, city)</span><textarea name="note" rows="3" placeholder="e.g. 2 boxes of apples, deliver to Srinagar"></textarea></label>
-      <button class="btn btn-green wide" type="submit">Send on WhatsApp</button>
-    </form>
-  </div>
-</section>
-
+</section><section class="sec"><div class="wrap"><header class="sh"><p class="eyebrow">Farm shop</p><h2>Fresh from the farm</h2><p class=sub>A few things we're known for. See everything in the shop.</p></header><div class="cards"><article class="card" data-cat="fruit"><figure class="ph "><img src="assets/photos/orchard.jpg" srcset="assets/photos/orchard-800.jpg 800w, assets/photos/orchard.jpg 1600w" sizes="(min-width:980px) 270px, 50vw" alt="Apples" width="1600" height="900" loading="lazy" decoding="async"><span class="cap">Apples</span></figure><div class="cb"><h3>Apples</h3><p>From our high-density orchard blocks.</p><a class="link" href="https://wa.me/917006901374?text=Salaam%20Welkin%20Farmstead%21%20I%27d%20like%20to%20enquire%20about%20apples%20%E2%80%94%20availability%20and%20rates%2C%20please." target="_blank" rel="noopener">Enquire on WhatsApp →</a></div></article><article class="card" data-cat="fruit"><figure class="ph "><img src="assets/photos/cherries.jpg" alt="Cherries" width="571" height="426" loading="lazy" decoding="async"><span class="cap">Cherries</span></figure><div class="cb"><h3>Cherries</h3><p>Premium, Cordia and Regina varieties.</p><a class="link" href="https://wa.me/917006901374?text=Salaam%20Welkin%20Farmstead%21%20I%27d%20like%20to%20enquire%20about%20cherries%20%28Premium%20/%20Cordia%20/%20Regina%29%20%E2%80%94%20availability%20and%20rates%2C%20please." target="_blank" rel="noopener">Enquire on WhatsApp →</a></div></article><article class="card" data-cat="fish"><figure class="ph "><img src="assets/photos/trout.jpg" srcset="assets/photos/trout-800.jpg 800w, assets/photos/trout.jpg 1102w" sizes="(min-width:980px) 270px, 50vw" alt="Rainbow trout" width="1102" height="640" loading="lazy" decoding="async"><span class="cap">Rainbow trout</span></figure><div class="cb"><h3>Rainbow trout</h3><p>Farm-fresh from Welkin Aquaculture.</p><a class="link" href="https://wa.me/917006901374?text=Salaam%20Welkin%20Aquaculture%21%20I%27d%20like%20to%20order%20fresh%20rainbow%20trout.%20Please%20share%20availability%20and%20rates." target="_blank" rel="noopener">Enquire on WhatsApp →</a></div></article><article class="card" data-cat="live"><figure class="ph "><img src="assets/photos/sheep.jpg" alt="Dumba sheep" width="601" height="451" loading="lazy" decoding="async"><span class="cap">Dumba sheep</span></figure><div class="cb"><h3>Dumba sheep</h3><p>Hardy fat-tailed sheep. Qurbani bookings open.</p><a class="link" href="https://wa.me/917006901374?text=Salaam%20Welkin%20Farmstead%21%20I%27d%20like%20to%20enquire%20about%20Dumba%20sheep%20%28Qurbani%29.%20Please%20share%20weights%20and%20rates." target="_blank" rel="noopener">Enquire on WhatsApp →</a></div></article></div><p class="more"><a class="btn btn-ghost" href="shop.html">See all products →</a></p></div></section><section class="sec tint"><div class="wrap"><header class="sh"><p class="eyebrow">Our farm</p><h2>Four ways we farm</h2></header><div class="tiles"><a class="tile" href="orchard.html"><img src="assets/photos/orchard.jpg" srcset="assets/photos/orchard-800.jpg 800w, assets/photos/orchard.jpg 1600w" sizes="(min-width:980px) 270px, 50vw" alt="Orchard" width="1600" height="900" loading="lazy" decoding="async"><div class="tt"><h3>Orchard</h3><p>High-density apples, stone fruit, kiwi and walnuts.</p><span>Explore →</span></div></a><a class="tile" href="aquaculture.html"><img src="assets/photos/tanks.jpg" srcset="assets/photos/tanks-800.jpg 800w, assets/photos/tanks.jpg 1021w" sizes="(min-width:980px) 270px, 50vw" alt="Aquaculture" width="1021" height="816" loading="lazy" decoding="async"><div class="tt"><h3>Aquaculture</h3><p>Rainbow trout raised in recirculating tanks.</p><span>Explore →</span></div></a><a class="tile" href="livestock.html"><img src="assets/photos/livestock.jpg" srcset="assets/photos/livestock-800.jpg 800w, assets/photos/livestock.jpg 1600w" sizes="(min-width:980px) 270px, 50vw" alt="Livestock" width="1600" height="900" loading="lazy" decoding="async"><div class="tt"><h3>Livestock</h3><p>Dumba &amp; Merino sheep, bulls, milk and Qurbani.</p><span>Explore →</span></div></a><a class="tile" href="visits.html"><img src="assets/photos/paddy.jpg" srcset="assets/photos/paddy-800.jpg 800w, assets/photos/paddy.jpg 1600w" sizes="(min-width:980px) 270px, 50vw" alt="Farm visits" width="1600" height="899" loading="lazy" decoding="async"><div class="tt"><h3>Farm visits</h3><p>Hands-on field days for students.</p><span>Explore →</span></div></a></div></div></section><section class="sec"><div class="wrap"><header class="sh"><p class="eyebrow">Seasons</p><h2>In season right now</h2><p class=sub>Typical Kashmir timing — message us for exact availability.</p></header><ul class="slist" id="slist" aria-live="polite"></ul><p class="more"><a class="btn btn-ghost" href="seasons.html">Full season calendar →</a></p></div></section><section class="sec tint"><div class="wrap"><div class="split"><div class="sp-l"><p class="eyebrow">Farm visits</p><h2>A day in the fields</h2><p class="sub">Schools and colleges are welcome to spend a day with us — harvesting, threshing, winnowing and touring the orchard, herd and trout tanks.</p><p><a class="btn btn-green" href="visits.html">Plan a visit</a></p></div><div class="sp-r"><figure class="ph "><img src="assets/photos/paddy.jpg" srcset="assets/photos/paddy-800.jpg 800w, assets/photos/paddy.jpg 1600w" sizes="(min-width:980px) 560px, 100vw" alt="Students on a Welkin farm visit" width="1600" height="899" loading="lazy" decoding="async"><span class="cap">Students on a Welkin farm visit</span></figure></div></div></div></section><section class="sec"><div class="wrap"><div class="band"><div><h2>Join the Welkin team</h2><p>We're hiring for farm operations, sales, logistics, maintenance and supervision.</p></div><a class="btn btn-light" href="careers.html">See open roles</a></div></div></section>
 </main>
-
 <footer class="footer">
-  <div class="wrap foot">
-    <div class="fb"><img src="assets/logo.png" alt="Welkin Farmstead logo" width="48" height="48"><div><b>Welkin Farmstead</b><span>Where goodness grows.</span></div></div>
-    <nav aria-label="Footer"><a href="#shop">Shop</a><a href="#farm">Our farm</a><a href="#seasons">Seasons</a><a href="#visit">Visits</a><a href="#contact">Contact</a></nav>
-    <p>© <span id="yr">2026</span> Welkin Farmstead · Sopore, Kashmir</p>
+  <div class="wrap fgrid">
+    <div class="fb"><img src="assets/logo.png" alt="Welkin Farmstead logo" width="56" height="56" loading="lazy"><div><b>Welkin Farmstead</b><span>Where goodness grows.</span></div></div>
+    <div><h4>Explore</h4><a href="index.html">Home</a><a href="shop.html">Farm shop</a><a href="seasons.html">Seasons</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a></div>
+    <div><h4>Our farm</h4><a href="orchard.html">Orchard</a><a href="aquaculture.html">Aquaculture</a><a href="livestock.html">Livestock</a><a href="visits.html">Farm visits</a></div>
+    <div><h4>Reach us</h4><a href="tel:+917006901374">70069 01374</a><a href="mailto:waseemhajini86@gmail.com">waseemhajini86@gmail.com</a><a href="https://www.instagram.com/welkinfarmstead/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/welkinfarmstead/" target="_blank" rel="noopener">Facebook</a><span>Sopore, Kashmir 193201</span></div>
   </div>
+  <div class="wrap fcopy">© <span id="yr">2026</span> Welkin Farmstead · Managed by Waseem Anayat Hajini</div>
 </footer>
-
-<a class="wa-float" data-wa="Salaam Welkin Farmstead! I'd like to know more." aria-label="Chat on WhatsApp">WhatsApp us</a>
-
+<div class="mbar"><a class="m-call" href="tel:+917006901374">Call</a><a class="m-wa" href="https://wa.me/917006901374?text=Salaam%20Welkin%20Farmstead%21%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener">WhatsApp</a></div>
 <script src="script.js"></script>
 </body>
 </html>

@@ -2,35 +2,40 @@
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const WA = '917006901374';
+  const wa = t => `https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
 
-  /* nav */
+  /* mobile drawer + dropdown */
   const links = $('#links'), burger = $('#burger');
-  burger.addEventListener('click', () => {
-    const o = links.classList.toggle('open'); burger.setAttribute('aria-expanded', o);
-  });
-  links.addEventListener('click', e => { if (e.target.closest('a')) { links.classList.remove('open'); burger.setAttribute('aria-expanded', false); } });
-
-  /* photo slots — real photos go in assets/photos/<name> */
-  $$('.ph').forEach(f => {
-    const file = f.dataset.f, cap = f.dataset.cap || '';
-    f.innerHTML = `<span class="nophoto">photo: ${file}</span>` +
-      `<img src="assets/photos/${file}" alt="${cap} — Welkin Farmstead" loading="lazy" decoding="async" onerror="this.remove()">` +
-      (cap ? `<span class="cap">${cap}</span>` : '');
-    const img = $('img', f);
-    img.addEventListener('load', () => { const n = $('.nophoto', f); if (n) n.remove(); });
-  });
+  const setMenu = o => {
+    links.classList.toggle('open', o);
+    burger.setAttribute('aria-expanded', o);
+    burger.setAttribute('aria-label', o ? 'Close menu' : 'Open menu');
+    document.body.classList.toggle('menu-open', o);
+  };
+  burger.addEventListener('click', () => setMenu(!links.classList.contains('open')));
+  links.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') { setMenu(false); $$('.dd.open').forEach(d => d.classList.remove('open')); } });
+  matchMedia('(min-width:861px)').addEventListener('change', () => setMenu(false));
+  $$('.dd > button').forEach(b => b.addEventListener('click', () => {
+    if (matchMedia('(max-width:860px)').matches) return;
+    const d = b.parentElement, o = !d.classList.contains('open');
+    d.classList.toggle('open', o); b.setAttribute('aria-expanded', o);
+  }));
+  document.addEventListener('click', e => { if (!e.target.closest('.dd')) $$('.dd.open').forEach(d => d.classList.remove('open')); });
 
   /* fade-in */
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { threshold: .1 });
-  $$('.card,.steps li,.band,.form,.season-box,.facts').forEach(el => { el.classList.add('fade'); io.observe(el); });
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }), { threshold: .08 });
+    $$('.card,.tile,.steps li,.band,.form,.season-box,.facts,.role').forEach(el => { el.classList.add('fade'); io.observe(el); });
+  }
 
-  /* tabs */
-  const tabs = $$('.tabs button');
-  tabs.forEach(b => b.addEventListener('click', () => {
-    tabs.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-selected', on); });
-    $$('.pane').forEach(p => { const on = p.id === b.dataset.t; p.classList.toggle('on', on); p.hidden = !on; });
+  /* shop filter */
+  const chips = $$('.chips button');
+  chips.forEach(b => b.addEventListener('click', () => {
+    chips.forEach(x => x.classList.toggle('on', x === b));
+    $$('#shopGrid .card').forEach(c => c.hidden = b.dataset.f !== 'all' && c.dataset.cat !== b.dataset.f);
   }));
 
   /* seasons */
@@ -50,15 +55,8 @@
     ['Fresh milk', 'From our herd', 0, 11],
   ];
   const now = new Date().getMonth(), mEl = $('#months'), out = $('#slist');
-  M.forEach((m, i) => {
-    const b = document.createElement('button');
-    b.textContent = m; b.setAttribute('role', 'tab');
-    if (i === now) b.classList.add('now');
-    b.addEventListener('click', () => show(i));
-    mEl.appendChild(b);
-  });
   function show(i) {
-    $$('button', mEl).forEach((b, j) => { b.classList.toggle('sel', j === i); b.setAttribute('aria-selected', j === i); });
+    if (mEl) $$('button', mEl).forEach((b, j) => { b.classList.toggle('sel', j === i); b.setAttribute('aria-selected', j === i); });
     const items = CROPS.filter(c => i >= c[2] && i <= c[3]);
     out.innerHTML = items.map(c => {
       const all = c[2] === 0 && c[3] === 11;
@@ -66,22 +64,40 @@
       return `<li><div><b>${c[0]}</b>${c[1] ? `<small>${c[1]}</small>` : ''}</div>${tag}</li>`;
     }).join('') || `<li class="empty">Nothing listed for ${FULL[i]}.</li>`;
   }
-  show(now);
+  if (out) {
+    if (mEl) M.forEach((m, i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = m; b.setAttribute('role', 'tab');
+      if (i === now) b.classList.add('now');
+      b.addEventListener('click', () => show(i));
+      mEl.appendChild(b);
+    });
+    show(now);
+    const sel = $('.months .sel'); if (sel) sel.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
 
-  /* WhatsApp + order form */
-  const wa = t => `https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
-  $$('[data-wa]').forEach(a => { a.href = wa(a.dataset.wa); a.target = '_blank'; a.rel = 'noopener'; });
-  const ITEMS = ['Apples', 'Cherries', 'Ruby Nectarines', 'Apricots / Pears', 'Kiwi', 'Walnuts', 'Rainbow trout', 'Fresh milk', 'Dumba sheep', 'Merino sheep', 'Bulls', 'Seedlings', 'A farm visit'];
-  $('#opts').innerHTML = ITEMS.map(i => `<label class="opt"><input type="checkbox" value="${i}"><span>${i}</span></label>`).join('');
-  $('#order').addEventListener('submit', e => {
+  /* forms → WhatsApp */
+  const open = t => window.open(wa(t), '_blank', 'noopener');
+  const order = $('#order');
+  if (order) {
+    const ITEMS = ['Apples', 'Cherries', 'Ruby Nectarines', 'Apricots / Pears', 'Kiwi', 'Walnuts', 'Rainbow trout', 'Fresh milk', 'Dumba sheep', 'Merino sheep', 'Bulls', 'Seedlings', 'A farm visit'];
+    $('#opts').innerHTML = ITEMS.map(i => `<label class="opt"><input type="checkbox" value="${i}"><span>${i}</span></label>`).join('');
+    order.addEventListener('submit', e => {
+      e.preventDefault();
+      const f = e.target, name = f.name.value.trim(), note = f.note.value.trim();
+      const picks = $$('input:checked', f).map(i => i.value);
+      let msg = `Salaam Welkin Farmstead! ${name ? `I'm ${name}. ` : ''}`;
+      msg += picks.length ? `I'd like to enquire about: ${picks.join(', ')}.` : `I'd like to know more about your farm.`;
+      if (note) msg += ` ${note}`;
+      open(msg);
+    });
+  }
+  const vf = $('#visitForm');
+  if (vf) vf.addEventListener('submit', e => {
     e.preventDefault();
-    const f = e.target, name = f.name.value.trim(), note = f.note.value.trim();
-    const picks = $$('input:checked', f).map(i => i.value);
-    let msg = `Salaam Welkin Farmstead! ${name ? `I'm ${name}. ` : ''}`;
-    msg += picks.length ? `I'd like to enquire about: ${picks.join(', ')}.` : `I'd like to know more about your farm.`;
-    if (note) msg += ` ${note}`;
-    window.open(wa(msg), '_blank', 'noopener');
+    const f = e.target, o = f.org.value.trim(), n = f.n.value.trim(), d = f.d.value.trim();
+    open(`Salaam Welkin Farmstead! We'd like to arrange a farm visit${o ? ` for ${o}` : ''}${n ? ` — about ${n} students` : ''}${d ? `, around ${d}` : ''}. Please share availability and details.`);
   });
 
-  $('#yr').textContent = new Date().getFullYear();
+  const y = $('#yr'); if (y) y.textContent = new Date().getFullYear();
 })();
