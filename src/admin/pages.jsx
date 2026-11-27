@@ -223,6 +223,7 @@ export function Enquiries() {
         <a className="a-btn" href="/api/admin/enquiries/export.csv"><Ico n="download" size={17} /> Export CSV</a>
         <Btn icon="refresh" onClick={reload}>Refresh</Btn>
       </Head>
+      {data && data.alerts === 'off' && <div className="a-alert"><Ico n="alert" size={18} /><div>WhatsApp alerts are <b>off</b>. New bookings are saved here, but you are not messaged. To get a WhatsApp message for every booking, add the alert settings in Netlify (see the README, “WhatsApp alerts”).</div></div>}
       <div className="a-chips mb">
         {[['new', `New${data ? ` (${data.counts.new})` : ''}`], ['handled', 'Handled'], ['all', 'All']].map(([k, l]) => <button type="button" key={k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>{l}</button>)}
       </div>
@@ -233,7 +234,7 @@ export function Enquiries() {
               <header>
                 <Badge kind={e.type === 'visit' ? 'blue' : e.type === 'qurbani' ? 'amber' : 'green'}>{e.type === 'visit' ? 'Farm visit' : e.type === 'qurbani' ? 'Qurbani' : 'Order'}</Badge>
                 <b>{e.name || e.org || 'Anonymous'}</b>
-                <small title={fmtDate(e.at)}>{ago(e.at)} · {e.page || ''}</small>
+                <small title={fmtDate(e.at)}>{ago(e.at)} · {e.page || ''}{e.alert === 'sent' ? ' · WhatsApp alert sent' : e.alert === 'failed' ? ' · WhatsApp alert failed' : ''}</small>
               </header>
               {e.q && (
                 <div className="a-qbook">

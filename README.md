@@ -57,3 +57,13 @@ ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='a-long-password' npm start
 Passwords are hashed with scrypt; sessions are signed HttpOnly SameSite=Strict cookies; every admin write needs a
 custom header (CSRF); sign-in is rate-limited; saved content is validated against the schema (links, images, numbers);
 uploads are checked by file signature and resized in the browser. `/admin` and `/api` are excluded from search engines.
+
+
+## WhatsApp alerts for bookings (optional)
+
+Every Qurbani booking, order and farm-visit request is **saved to the site database** (Netlify Blobs) and listed under *Admin > Enquiries*. To also get a WhatsApp message on the owner's phone the moment one arrives, set **one** of these in Netlify (Site configuration > Environment variables):
+
+- **CallMeBot (free, simplest):** `CALLMEBOT_PHONE` (e.g. `917006901374`) and `CALLMEBOT_APIKEY`. Get the key by sending "I allow callmebot to send me messages" to the CallMeBot WhatsApp number (see callmebot.com).
+- **WhatsApp Cloud API (Meta, business-grade):** `WA_CLOUD_TOKEN`, `WA_PHONE_NUMBER_ID`, `WA_NOTIFY_TO`. For alerts outside WhatsApp's 24-hour window, create an approved message template with one body variable and set `WA_TEMPLATE` (and `WA_TEMPLATE_LANG`).
+
+If neither is set, bookings are still saved and the admin shows a notice that alerts are off. A failed alert never loses a booking.

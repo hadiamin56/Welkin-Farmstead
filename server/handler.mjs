@@ -5,6 +5,7 @@ import { getStore } from './store.mjs';
 import { hashPassword, verifyPassword, safeEqual, sign, verify, readCookie, sessionCookie, clearCookie, COOKIE, secret } from './auth.mjs';
 import { sanitize, withDefaults, diffPaths } from '../src/content/sanitize.js';
 import { DEFAULTS } from '../src/content/defaults.js';
+import { sendAlert, alertProvider } from './notify.mjs';
 
 const J = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), { status, headers: { ...J, ...headers } });
@@ -91,9 +92,11 @@ async function enquiry(req, store) {
     if (!rec.q.animal || !rec.q.phone) return err(400, 'Please choose an animal and enter your phone number.');
   }
   if (!rec.name && !rec.items.length && !rec.note && !rec.org) return json({ ok: true });
-  await store.setJSON(`enq/${rec.id}`, rec);
+  await store.setJSON(`enq/${rec.id}`, rec); // saved first: the alert below can never lose a booking
   await bump(store, rl);
-  return json({ ok: true });
+  rec.alert = await sendAlert(rec);
+  if (rec.alert !== 'off') await store.setJSON(`enq/${rec.id}`, rec).catch(() => {});
+  return json({ ok: true, id: rec.id });
 }
 
 async function serveMedia(name, store) {
@@ -273,7 +276,7 @@ async function admin(req, url, store) {
 
     case 'health': {
       const users = await store.list('user/');
-      return json({ store: store.kind, jwtSecret: !!secret(), adminEnv: !!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD), buildHook: !!process.env.BUILD_HOOK_URL, users: users.length, time: now() });
+      return json({ store: store.kind, jwtSecret: !!secret(), adminEnv: !!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD), buildHook: !!process.env.BUILD_HOOK_URL, whatsappAlerts: alertProvider(), users: users.length, time: now() });
     }
 
     case 'export': {
@@ -375,7 +378,7 @@ async function adminEnquiries(req, sub, url, store, me) {
       const csv = [head.join(','), ...rows.map((r) => [r.at, r.type, r.status, r.name, (r.items || []).join('; '), r.note, r.org, r.students, r.date, r.page, r.q?.animal, r.q?.weight, r.q?.qty, r.q?.phone, r.q?.city, r.q?.delivery, r.q?.date].map(esc).join(','))].join('\n');
       return new Response(csv, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="welkin-enquiries.csv"', 'cache-control': 'no-store' } });
     }
-    return json({ enquiries: rows.slice(0, 500), counts: { new: rows.filter((r) => r.status === 'new').length, total: rows.length } });
+    return json({ alerts: alertProvider(), enquiries: rows.slice(0, 500), counts: { new: rows.filter((r) => r.status === 'new').length, total: rows.length } });
   }
   const id = sub[1];
   if (!id || !/^[a-z0-9]{6,24}$/.test(id)) return err(400, 'Bad id');

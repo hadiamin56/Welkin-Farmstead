@@ -3,7 +3,7 @@ import { Sec, PageHead } from '../components/Blocks.jsx';
 import { Img } from '../components/Img.jsx';
 import { useContent } from '../content/ContentContext.jsx';
 import { wa } from '../lib/site.js';
-import { logEnquiry } from '../lib/enquiry.js';
+import { saveEnquiry } from '../lib/enquiry.js';
 
 export default function Qurbani() {
   const { qurbaniPage: q, site } = useContent();
@@ -16,8 +16,10 @@ export default function Qurbani() {
 
   const pick = (i) => { setAnimal(i); setWeight(''); };
 
-  const submit = (e) => {
+  const [busy, setBusy] = useState(false);
+  const submit = async (e) => {
     e.preventDefault();
+    if (busy) return;
     const f = e.currentTarget.elements;
     const name = f.name.value.trim();
     const phone = f.phone.value.trim();
@@ -26,7 +28,9 @@ export default function Qurbani() {
     setErr('');
     const d = { animal: a.name, weight, qty, phone, city: f.city.value.trim(), delivery: f.delivery ? f.delivery.value : '', date: f.date.value.trim() };
     const note = f.note.value.trim();
-    logEnquiry({ type: 'qurbani', name, note, q: d, hp: f.website.value });
+    setBusy(true);
+    const saved = await saveEnquiry({ type: 'qurbani', name, note, q: d, hp: f.website.value });
+    setBusy(false);
     const msg = [
       `Salaam ${site.name}! I'd like to book Qurbani.`,
       `Animal: ${qty} × ${a.name}${weight ? ` (${weight})` : ''}`,
@@ -35,8 +39,8 @@ export default function Qurbani() {
       'Please confirm availability and the rate.',
     ].filter(Boolean).join('\n');
     const link = wa(msg);
-    setDone(link);
-    window.open(link, '_blank', 'noopener');
+    setDone({ link, saved });
+    if (!saved) window.open(link, '_blank', 'noopener'); // server unreachable: hand the booking to WhatsApp so it is not lost
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -47,8 +51,8 @@ export default function Qurbani() {
         {done ? (
           <div className="qdone" role="status">
             <h2>{q.doneTitle}</h2>
-            <p>{q.doneText}</p>
-            <p className="qacts"><a className="btn btn-green" href={done} target="_blank" rel="noopener">Open WhatsApp</a> <button type="button" className="btn btn-ghost" onClick={() => setDone(null)}>Book another</button></p>
+            <p>{done.saved ? q.doneText : 'We could not reach our server, so your request was opened in WhatsApp instead. Please press Send there.'}</p>
+            <p className="qacts"><a className="btn btn-green" href={done.link} target="_blank" rel="noopener">Chat with us on WhatsApp</a> <button type="button" className="btn btn-ghost" onClick={() => setDone(null)}>Book another</button></p>
           </div>
         ) : (
           <form className="form qform" onSubmit={submit}>
@@ -100,7 +104,7 @@ export default function Qurbani() {
             <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
             {err && <p className="qerr" role="alert">{err}</p>}
             <p className="qnote">{q.note}</p>
-            <button className="btn btn-green wide" type="submit">{q.button}</button>
+            <button className="btn btn-green wide" type="submit" disabled={busy}>{busy ? 'Sending…' : q.button}</button>
           </form>
         )}
       </Sec>

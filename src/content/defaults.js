@@ -212,7 +212,7 @@ export const DEFAULTS = {
     deliveries: ['I will collect from the farm', 'Deliver in Sopore', 'Deliver in Srinagar', 'Deliver elsewhere in Kashmir'],
     note: 'Sending this does not charge anything. It reserves your request; we will confirm the animal, the rate and the advance on WhatsApp.',
     button: 'Send booking request',
-    doneTitle: 'Booking request sent', doneText: 'Thank you! We have received your request and will confirm on WhatsApp shortly. If WhatsApp did not open, use the button below.',
+    doneTitle: 'Booking request sent', doneText: 'Thank you! Your booking is saved and our team has been notified. We will confirm availability and the rate on WhatsApp shortly. You can also message us directly below.',
   },
 
   visits: {
