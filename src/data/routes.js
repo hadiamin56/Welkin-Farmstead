@@ -6,6 +6,7 @@ export const ROUTES = [
   { path: '/orchard', file: 'orchard/index.html', key: 'orchard', active: 'farm', sub: 'orchard', seo: 'orchard', navTitle: 'Orchard' },
   { path: '/aquaculture', file: 'aquaculture/index.html', key: 'aqua', active: 'farm', sub: 'aqua', seo: 'aquaculture', navTitle: 'Aquaculture' },
   { path: '/livestock', file: 'livestock/index.html', key: 'livestock', active: 'farm', sub: 'livestock', seo: 'livestock', navTitle: 'Livestock & Qurbani' },
+  { path: '/qurbani', file: 'qurbani/index.html', key: 'qurbani', active: 'farm', sub: 'livestock', seo: 'qurbani', navTitle: 'Book Qurbani' },
   { path: '/visits', file: 'visits/index.html', key: 'visits', active: 'farm', sub: 'visits', seo: 'visits', navTitle: 'Farm visits' },
   { path: '/seasons', file: 'seasons/index.html', key: 'seasons', active: 'seasons', sub: '', seo: 'seasons', navTitle: 'Seasons' },
   { path: '/careers', file: 'careers/index.html', key: 'careers', active: 'careers', sub: '', seo: 'careers', navTitle: 'Careers' },

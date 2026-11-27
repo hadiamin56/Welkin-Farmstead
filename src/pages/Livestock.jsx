@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Sec, Sh, Split, Steps, EnqBand, PageHead, WaButton } from '../components/Blocks.jsx';
 import { Ph } from '../components/Img.jsx';
 import { InfoCard } from '../components/Parts.jsx';
@@ -11,7 +12,7 @@ export default function Livestock() {
       <PageHead
         trail={[['Home', '/'], ['Our farm'], ['Livestock']]} title={l.title} lead={l.lead}
         banner={l.banner} bannerAlt={l.title}
-        ctas={<WaButton msg={l.ctaMsg}>{l.cta}</WaButton>}
+        ctas={<Link className="btn btn-green" to="/qurbani">{l.cta}</Link>}
       />
       <Sec>
         <Sh eyebrow={l.breedsHead.eyebrow} title={l.breedsHead.title} />
@@ -25,6 +26,7 @@ export default function Livestock() {
             <h2>{l.qurbani.title}</h2>
             <p className="sub">{l.qurbani.sub}</p>
             <Steps items={l.qurbani.steps.map((s) => [s.t, s.d])} />
+            <Link className="btn btn-green" to="/qurbani">{l.cta}</Link>
           </>}
           right={<Ph file={l.qurbani.image} cap={l.qurbani.cap} sizes="(min-width:980px) 560px, 100vw" />}
         />

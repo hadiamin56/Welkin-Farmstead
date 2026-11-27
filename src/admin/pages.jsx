@@ -231,10 +231,17 @@ export function Enquiries() {
           {list.map((e) => (
             <article key={e.id} className={`a-enq ${e.status}`}>
               <header>
-                <Badge kind={e.type === 'visit' ? 'blue' : 'green'}>{e.type === 'visit' ? 'Farm visit' : 'Order'}</Badge>
+                <Badge kind={e.type === 'visit' ? 'blue' : e.type === 'qurbani' ? 'amber' : 'green'}>{e.type === 'visit' ? 'Farm visit' : e.type === 'qurbani' ? 'Qurbani' : 'Order'}</Badge>
                 <b>{e.name || e.org || 'Anonymous'}</b>
                 <small title={fmtDate(e.at)}>{ago(e.at)} · {e.page || ''}</small>
               </header>
+              {e.q && (
+                <div className="a-qbook">
+                  <p><b>{e.q.qty} × {e.q.animal}</b>{e.q.weight ? ` · ${e.q.weight}` : ''}</p>
+                  <p><b>Phone:</b> <a href={`tel:${e.q.phone}`}>{e.q.phone}</a>{e.q.city ? ` · ${e.q.city}` : ''}</p>
+                  {(e.q.delivery || e.q.date) && <p><b>Delivery:</b> {[e.q.delivery, e.q.date].filter(Boolean).join(' · ')}</p>}
+                </div>
+              )}
               {e.items.length > 0 && <p><b>Wants:</b> {e.items.join(', ')}</p>}
               {e.type === 'visit' && <p><b>Group:</b> {[e.org, e.students && `${e.students} students`, e.date].filter(Boolean).join(' · ')}</p>}
               {e.note && <p className="a-quote">{e.note}</p>}

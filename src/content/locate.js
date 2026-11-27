@@ -18,7 +18,7 @@ export function leaves(content) {
 // Which top-level content areas belong to which page (used to rank ambiguous matches).
 const PAGE_KEYS = {
   '/': ['home', 'products', 'locations', 'findUs', 'site'], '/shop': ['shop', 'products', 'enq'], '/orchard': ['orchard', 'enq'],
-  '/aquaculture': ['aquaculture', 'enq'], '/livestock': ['livestock', 'enq'], '/visits': ['visits'], '/seasons': ['seasonsPage', 'crops', 'enq'],
+  '/aquaculture': ['aquaculture', 'enq'], '/livestock': ['livestock', 'enq'], '/qurbani': ['qurbaniPage'], '/visits': ['visits'], '/seasons': ['seasonsPage', 'crops', 'enq'],
   '/careers': ['careersPage', 'roles'], '/gallery': ['galleryPage', 'gallery', 'home'], '/contact': ['contactPage', 'faq', 'orderItems', 'locations', 'findUs', 'site'],
 };
 

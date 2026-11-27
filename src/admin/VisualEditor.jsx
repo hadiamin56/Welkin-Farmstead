@@ -11,8 +11,8 @@ const DEVICES = {
   tablet: { label: 'Tablet', icon: 'store', w: 820, h: 1100 },
   phone: { label: 'Phone', icon: 'paw', w: 390, h: 844 },
 };
-const PAGES = [['/', 'Home'], ['/shop', 'Farm shop'], ['/orchard', 'Orchard'], ['/aquaculture', 'Aquaculture'], ['/livestock', 'Livestock'], ['/visits', 'Farm visits'], ['/seasons', 'Seasons'], ['/gallery', 'Gallery'], ['/careers', 'Careers'], ['/contact', 'Contact']];
-const SECTION_OF_PAGE = { '/': 'home', '/shop': 'shop', '/orchard': 'orchard', '/aquaculture': 'aquaculture', '/livestock': 'livestock', '/visits': 'visits', '/seasons': 'seasons', '/gallery': 'gallery', '/careers': 'careers', '/contact': 'contact' };
+const PAGES = [['/', 'Home'], ['/shop', 'Farm shop'], ['/orchard', 'Orchard'], ['/aquaculture', 'Aquaculture'], ['/livestock', 'Livestock'], ['/qurbani', 'Qurbani booking'], ['/visits', 'Farm visits'], ['/seasons', 'Seasons'], ['/gallery', 'Gallery'], ['/careers', 'Careers'], ['/contact', 'Contact']];
+const SECTION_OF_PAGE = { '/': 'home', '/shop': 'shop', '/orchard': 'orchard', '/aquaculture': 'aquaculture', '/livestock': 'livestock', '/qurbani': 'qurbani', '/visits': 'visits', '/seasons': 'seasons', '/gallery': 'gallery', '/careers': 'careers', '/contact': 'contact' };
 const blockName = (id) => (HOME_BLOCKS.find((b) => b[0] === id) || [id, id])[1];
 
 /* ---------- the field editor for whatever was clicked on the page ---------- */

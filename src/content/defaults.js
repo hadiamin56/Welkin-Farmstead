@@ -19,7 +19,7 @@ export const DEFAULTS = {
     announcement: {
       enabled: true,
       text: 'Eid-ul-Adha Qurbani bookings are open',
-      cta: 'Book on WhatsApp →',
+      cta: 'Book now →',
       msg: "Salaam Welkin Farmstead! I'd like to book an animal for Eid-ul-Adha Qurbani.",
     },
     qurbaniCard: { title: 'Eid-ul-Adha Qurbani bookings are open', text: 'Dumba, Merino and bulls — reserve early.', button: 'Book' },
@@ -33,6 +33,7 @@ export const DEFAULTS = {
     shop: { title: 'Farm shop · Welkin Farmstead', desc: 'Shop apples, cherries, Ruby Nectarines, walnuts, rainbow trout, Dumba and Merino sheep and bulls from Welkin Farmstead, Sopore.' },
     orchard: { title: 'Orchard · Welkin Farmstead', desc: 'High-density apple orchards plus pears, Ruby Nectarines, apricots, cherries, kiwi and walnuts at Welkin Farmstead, Sopore.' },
     aquaculture: { title: 'Aquaculture · Welkin Farmstead', desc: 'Welkin Aquaculture: farm-fresh rainbow trout raised in a Recirculating Aquaculture System in Sopore, Kashmir.' },
+    qurbani: { title: 'Book Qurbani · Welkin Farmstead', desc: 'Book your Eid-ul-Adha Qurbani animal at Welkin Farmstead, Sopore: choose the breed and weight, and we confirm on WhatsApp.' },
     livestock: { title: 'Livestock & Qurbani · Welkin Farmstead', desc: 'Dumba and Merino sheep, bulls, fresh milk and Eid-ul-Adha Qurbani bookings at Welkin Farmstead, Sopore.' },
     visits: { title: 'Farm visits · Welkin Farmstead', desc: 'Educational farm visits for students at Welkin Farmstead: paddy harvesting, threshing, winnowing and farm tours.' },
     seasons: { title: 'Seasons · Welkin Farmstead', desc: 'A seasonal guide to what is ready when at Welkin Farmstead in Kashmir: cherries, apricots, nectarines, apples, walnuts, kiwi and more.' },
@@ -197,6 +198,21 @@ export const DEFAULTS = {
       ],
       image: P('livestock.jpg'), cap: 'Sheep and cattle grazing at Welkin Farmstead',
     },
+  },
+
+  qurbaniPage: {
+    title: 'Book your Qurbani', lead: 'Choose the animal, the weight and how you want it delivered. We confirm availability and the rate on WhatsApp.',
+    banner: P('livestock.jpg'),
+    animalsHead: 'Choose your animal', weightHead: 'Approximate weight', detailsHead: 'Your details',
+    animals: [
+      { image: P('sheep.jpg'), name: 'Dumba sheep', text: 'Hardy, fat-tailed sheep.', weights: ['Up to 25 kg', '25–35 kg', '35–45 kg', '45 kg and above'] },
+      { image: P('merino.jpg'), name: 'Merino sheep', text: 'A fine-wool breed.', weights: ['Up to 25 kg', '25–35 kg', '35–45 kg', '45 kg and above'] },
+      { image: P('bull.jpg'), name: 'Bull', text: 'Healthy bulls raised on the farm.', weights: ['150–250 kg', '250–350 kg', '350 kg and above'] },
+    ],
+    deliveries: ['I will collect from the farm', 'Deliver in Sopore', 'Deliver in Srinagar', 'Deliver elsewhere in Kashmir'],
+    note: 'Sending this does not charge anything. It reserves your request; we will confirm the animal, the rate and the advance on WhatsApp.',
+    button: 'Send booking request',
+    doneTitle: 'Booking request sent', doneText: 'Thank you! We have received your request and will confirm on WhatsApp shortly. If WhatsApp did not open, use the button below.',
   },
 
   visits: {

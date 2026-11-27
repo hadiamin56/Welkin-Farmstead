@@ -15,7 +15,7 @@ const LS = (k, label, o = {}) => ({ k, t: 'list', label, scalar: 'text', max: 40
 export const HOME_BLOCKS = [['strip', 'Scrolling ticker'], ['shop', 'Farm shop teaser'], ['why', 'Why Welkin (dark panel)'], ['journey', 'Journey'], ['farm', 'Four ways we farm'], ['seasons', 'In season now'], ['visit', 'Farm visits teaser'], ['find', 'Find us & map'], ['follow', 'Follow the farm'], ['band', 'Hiring band']];
 export const ICONS_ART = ['tree', 'apple', 'sheep', 'fish', 'wheat', 'sprig', 'cherries', 'apple-branch'];
 export const ICONS_UI = ['leaf', 'fish', 'hand', 'cap'];
-export const PAGES_TO = ['/orchard', '/aquaculture', '/livestock', '/visits', '/shop', '/seasons', '/gallery', '/careers', '/contact'];
+export const PAGES_TO = ['/qurbani', '/orchard', '/aquaculture', '/livestock', '/visits', '/shop', '/seasons', '/gallery', '/careers', '/contact'];
 export const CATEGORIES = [['fruit', 'Fruit & nuts'], ['fish', 'Fish'], ['live', 'Livestock']];
 export const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -45,7 +45,7 @@ export const ROOT = [
 
   G('seo', 'Search & sharing', [
     seoPage('home', 'Home'), seoPage('shop', 'Farm shop'), seoPage('orchard', 'Orchard'), seoPage('aquaculture', 'Aquaculture'),
-    seoPage('livestock', 'Livestock'), seoPage('visits', 'Farm visits'), seoPage('seasons', 'Seasons'), seoPage('careers', 'Careers'),
+    seoPage('qurbani', 'Qurbani booking'), seoPage('livestock', 'Livestock'), seoPage('visits', 'Farm visits'), seoPage('seasons', 'Seasons'), seoPage('careers', 'Careers'),
     seoPage('gallery', 'Gallery'), seoPage('contact', 'Contact'), I('shareImage', 'Image shown when a link is shared'),
   ]),
 
@@ -112,6 +112,15 @@ export const ROOT = [
     G('qurbani', 'Qurbani booking', [T('eyebrow', 'Small label'), T('title', 'Title'), A('sub', 'Text', { rows: 3 }), steps('steps'), I('image', 'Photo'), T('cap', 'Photo caption')]),
   ]),
 
+  G('qurbaniPage', 'Qurbani booking page', [
+    T('title', 'Title', { max: 80 }), A('lead', 'Intro', { rows: 3 }), I('banner', 'Banner photo'),
+    T('animalsHead', 'Step 1 heading', { max: 60 }), T('weightHead', 'Step 2 heading', { max: 60 }), T('detailsHead', 'Step 3 heading', { max: 60 }),
+    L('animals', 'Animals people can choose', [I('image', 'Photo'), T('name', 'Name', { max: 60 }), T('text', 'Short text', { max: 100 }), LS('weights', 'Weight choices (e.g. 25–35 kg)', { max: 10, itemMax: 40 })], { itemLabel: 'name', max: 8 }),
+    LS('deliveries', 'Delivery choices', { max: 8, itemMax: 60 }),
+    A('note', 'Small note above the button', { max: 300, rows: 2 }), T('button', 'Button label', { max: 40 }),
+    T('doneTitle', 'After sending: title', { max: 60 }), A('doneText', 'After sending: text', { max: 300, rows: 2 }),
+  ]),
+
   G('visits', 'Farm visits page', [
     T('title', 'Title', { max: 80 }), A('lead', 'Intro', { rows: 3 }), I('banner', 'Banner photo'), ...ctaFields,
     G('intro', 'Intro block', [T('eyebrow', 'Small label'), T('title', 'Title'), A('sub', 'Text', { rows: 4 }), LS('ticks', 'Bullet points', { max: 8 }), I('image', 'Photo'), T('cap', 'Photo caption')]),
@@ -152,6 +161,7 @@ export const SECTIONS = [
   { id: 'orchard', title: 'Orchard', icon: 'leaf', keys: ['orchard'], desc: 'The orchard page.' },
   { id: 'aquaculture', title: 'Aquaculture', icon: 'fish', keys: ['aquaculture'], desc: 'The aquaculture page.' },
   { id: 'livestock', title: 'Livestock', icon: 'paw', keys: ['livestock'], desc: 'The livestock & Qurbani page.' },
+  { id: 'qurbani', title: 'Qurbani booking', icon: 'paw', keys: ['qurbaniPage'], desc: 'The Qurbani booking page: animals, weights and delivery choices.' },
   { id: 'visits', title: 'Farm visits', icon: 'cap', keys: ['visits'], desc: 'The student visits page.' },
   { id: 'seasons', title: 'Seasons', icon: 'calendar', keys: ['seasonsPage', 'crops'], desc: 'The seasons page and the calendar of what is ready when.' },
   { id: 'gallery', title: 'Gallery', icon: 'image', keys: ['galleryPage', 'gallery'], desc: 'The photo gallery.' },

@@ -57,7 +57,7 @@ export function Header({ route }) {
         <div className="annc" id="annc" role="region" aria-label="Announcement">
           <div className="wrap">
             <span>{ann.text}</span>
-            <a href={wa(ann.msg)} target="_blank" rel="noopener">{ann.cta}</a>
+            <Link to="/qurbani">{ann.cta}</Link>
           </div>
         </div>
       )}

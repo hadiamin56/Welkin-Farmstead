@@ -78,12 +78,18 @@ async function enquiry(req, store) {
   const b = await readJson(req, 20_000);
   if (b.hp) return json({ ok: true }); // honeypot
   const s = (v, n) => String(v ?? '').replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, n);
-  const type = ['order', 'visit', 'other'].includes(b.type) ? b.type : 'other';
+  const type = ['order', 'visit', 'qurbani', 'other'].includes(b.type) ? b.type : 'other';
   const rec = {
     id: `${Date.now().toString(36)}${rid()}`, at: now(), status: 'new', type,
     name: s(b.name, 80), items: Array.isArray(b.items) ? b.items.slice(0, 30).map((x) => s(x, 60)) : [], note: s(b.note, 600),
     org: s(b.org, 120), students: s(b.n, 20), date: s(b.d, 60), page: s(b.page, 80),
   };
+  if (type === 'qurbani') {
+    const q = b.q && typeof b.q === 'object' ? b.q : {};
+    const qty = Math.min(20, Math.max(1, parseInt(q.qty, 10) || 1));
+    rec.q = { animal: s(q.animal, 60), weight: s(q.weight, 40), qty, phone: s(q.phone, 20), city: s(q.city, 80), delivery: s(q.delivery, 80), date: s(q.date, 60) };
+    if (!rec.q.animal || !rec.q.phone) return err(400, 'Please choose an animal and enter your phone number.');
+  }
   if (!rec.name && !rec.items.length && !rec.note && !rec.org) return json({ ok: true });
   await store.setJSON(`enq/${rec.id}`, rec);
   await bump(store, rl);
@@ -365,8 +371,8 @@ async function adminEnquiries(req, sub, url, store, me) {
     const rows = (await Promise.all(keys.map((k) => store.getJSON(k)))).filter(Boolean).sort((a, b) => (a.at < b.at ? 1 : -1));
     if (sub[1] === 'export.csv') {
       const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-      const head = ['received', 'type', 'status', 'name', 'items', 'note', 'organisation', 'students', 'date', 'page'];
-      const csv = [head.join(','), ...rows.map((r) => [r.at, r.type, r.status, r.name, (r.items || []).join('; '), r.note, r.org, r.students, r.date, r.page].map(esc).join(','))].join('\n');
+      const head = ['received', 'type', 'status', 'name', 'items', 'note', 'organisation', 'students', 'date', 'page', 'animal', 'weight', 'quantity', 'phone', 'city', 'delivery', 'preferred date'];
+      const csv = [head.join(','), ...rows.map((r) => [r.at, r.type, r.status, r.name, (r.items || []).join('; '), r.note, r.org, r.students, r.date, r.page, r.q?.animal, r.q?.weight, r.q?.qty, r.q?.phone, r.q?.city, r.q?.delivery, r.q?.date].map(esc).join(','))].join('\n');
       return new Response(csv, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="welkin-enquiries.csv"', 'cache-control': 'no-store' } });
     }
     return json({ enquiries: rows.slice(0, 500), counts: { new: rows.filter((r) => r.status === 'new').length, total: rows.length } });

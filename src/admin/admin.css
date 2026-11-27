@@ -276,3 +276,5 @@
   .adm .mobile-only{display:inline-flex}
   .adm .v-grid.panel .v-panel{border-right:0}
 }
+.adm .a-qbook{background:#f3f7f1;border-radius:10px;padding:8px 12px;margin:6px 0}
+.adm .a-qbook p{margin:2px 0}

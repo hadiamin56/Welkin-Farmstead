@@ -7,6 +7,7 @@ import Shop from './pages/Shop.jsx';
 import Orchard from './pages/Orchard.jsx';
 import Aquaculture from './pages/Aquaculture.jsx';
 import Livestock from './pages/Livestock.jsx';
+import Qurbani from './pages/Qurbani.jsx';
 import Visits from './pages/Visits.jsx';
 import { Seasons, Careers, Gallery, Contact, NotFound } from './pages/Others.jsx';
 
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/orchard" element={<Orchard />} />
         <Route path="/aquaculture" element={<Aquaculture />} />
         <Route path="/livestock" element={<Livestock />} />
+        <Route path="/qurbani" element={<Qurbani />} />
         <Route path="/visits" element={<Visits />} />
         <Route path="/seasons" element={<Seasons />} />
         <Route path="/careers" element={<Careers />} />

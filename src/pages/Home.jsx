@@ -86,7 +86,7 @@ export default function Home() {
       <div className="wrap qb">
         <div className="qb-card">
           <div><b>{site.qurbaniCard.title}</b><span>{site.qurbaniCard.text}</span></div>
-          <WaButton cls="btn btn-sm btn-green" msg={site.announcement.msg}>{site.qurbaniCard.button}</WaButton>
+          <Link className="btn btn-sm btn-green" to="/qurbani">{site.qurbaniCard.button}</Link>
         </div>
       </div>
 
