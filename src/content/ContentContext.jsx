@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { Fragment, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { SNAPSHOT, SNAPSHOT_VERSION } from './snapshot.js';
 import { withDefaults } from './merge.js';
 import { setWhatsApp } from '../lib/site.js';
+import { themeCss } from './theme.js';
 
 const Ctx = createContext({ content: SNAPSHOT, preview: false, exitPreview: () => {} });
 
@@ -14,10 +15,26 @@ const PREVIEW_KEY = 'welkin-preview';
  */
 export function ContentProvider({ children }) {
   const [state, setState] = useState({ content: SNAPSHOT, version: SNAPSHOT_VERSION, preview: false });
+  const [Bridge, setBridge] = useState(null);
+  const [epoch, setEpoch] = useState(0);
   setWhatsApp(state.content.site.whatsapp);
+
+  // Brand colours: a tiny <style> that only exists when the colours were changed in the admin.
+  const css = themeCss(state.content.theme);
+  useEffect(() => {
+    let el = document.getElementById('welkin-theme');
+    if (!css) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement('style'); el.id = 'welkin-theme'; document.head.appendChild(el); }
+    el.textContent = css;
+  }, [css]);
 
   useEffect(() => {
     let dead = false;
+    // Inside the admin's preview frame: the admin pushes the draft in live, so skip the API and load the editor bridge.
+    if (new URLSearchParams(window.location.search).has('embed') && window.parent !== window) {
+      import('./EditBridge.jsx').then((m) => { if (!dead) setBridge(() => m.default); });
+      return () => { dead = true; };
+    }
     const wantPreview = new URLSearchParams(window.location.search).has('preview') || sessionStorage.getItem(PREVIEW_KEY) === '1';
     const load = async () => {
       if (wantPreview) {
@@ -49,7 +66,12 @@ export function ContentProvider({ children }) {
     preview: state.preview,
     exitPreview: () => { sessionStorage.removeItem(PREVIEW_KEY); window.location.href = window.location.pathname; },
   }), [state]);
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      <Fragment key={epoch}>{children}</Fragment>
+      {Bridge && <Bridge content={state.content} onContent={(c) => setState({ content: withDefaults(c), version: -2, preview: false })} onRemount={() => setEpoch((e) => e + 1)} />}
+    </Ctx.Provider>
+  );
 }
 
 export const useContent = () => useContext(Ctx).content;

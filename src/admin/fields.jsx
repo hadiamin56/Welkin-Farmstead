@@ -129,6 +129,22 @@ function NumberField({ f, path, value }) {
   );
 }
 
+function ColorField({ f, path, value }) {
+  const { setValue } = useAdmin();
+  const [text, setText] = useState(value || '');
+  useEffect(() => { setText(value || ''); }, [value]);
+  const commit = (v) => { setText(v); if (/^#[0-9a-fA-F]{6}$/.test(v)) setValue(path, v.toLowerCase()); };
+  return (
+    <div className="a-field">
+      <span className="a-label">{f.label}</span>
+      <div className="a-color">
+        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(text) ? text : '#000000'} onChange={(e) => commit(e.target.value)} aria-label={f.label} />
+        <input className="a-input sm" value={text} maxLength={7} onChange={(e) => commit(e.target.value)} spellCheck={false} />
+      </div>
+    </div>
+  );
+}
+
 function ProductPicks({ f, path, value }) {
   const { setValue, doc } = useAdmin();
   const list = doc.draft.products.filter((p) => p.visible);
@@ -154,6 +170,7 @@ function ProductPicks({ f, path, value }) {
 /* ================= lists ================= */
 export function blank(f) {
   switch (f.t) {
+    case 'color': return '#1f5a3a';
     case 'toggle': return true;
     case 'select': return f.options[0];
     case 'number': return f.min;
@@ -239,6 +256,7 @@ export function Field({ f, path, depth = 0 }) {
     case 'select': return <SelectField f={f} path={path} value={value} />;
     case 'toggle': return <Toggle f={f} path={path} value={value} />;
     case 'number': return <NumberField f={f} path={path} value={value} />;
+    case 'color': return <ColorField f={f} path={path} value={value} />;
     case 'productPicks': return <ProductPicks f={f} path={path} value={value} />;
     case 'list': return <ListField f={f} path={path} value={value} />;
     case 'group':

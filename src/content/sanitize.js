@@ -47,6 +47,10 @@ function clean(f, v, d, errors, path) {
       const ok = f.options.includes(f.numeric ? Number(v) : v);
       return ok ? (f.numeric ? Number(v) : v) : clone(d);
     }
+    case 'color': {
+      const s = typeof v === 'string' ? v.trim().toLowerCase() : '';
+      return /^#[0-9a-f]{6}$/.test(s) ? s : clone(d);
+    }
     case 'toggle': return typeof v === 'boolean' ? v : clone(d);
     case 'number': {
       const n = Number(v);
@@ -96,6 +100,12 @@ export function sanitize(input, base = DEFAULTS) {
     return { ...p, id };
   });
   content.home.shop.featured = content.home.shop.featured.filter((id) => seen.has(id));
+
+  // every home block must appear exactly once (new blocks are appended, duplicates dropped)
+  const have = new Set();
+  const layout = content.home.layout.filter((b) => (have.has(b.id) ? false : have.add(b.id)));
+  for (const b of base.home.layout) if (!have.has(b.id)) layout.push({ ...b });
+  content.home.layout = layout;
   return { content, errors };
 }
 

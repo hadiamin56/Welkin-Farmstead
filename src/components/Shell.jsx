@@ -54,7 +54,7 @@ export function Header({ route }) {
     <>
       <a className="skip" href="#main">Skip to content</a>
       {ann.enabled && (
-        <div className="annc" id="annc">
+        <div className="annc" id="annc" role="region" aria-label="Announcement">
           <div className="wrap">
             <span>{ann.text}</span>
             <a href={wa(ann.msg)} target="_blank" rel="noopener">{ann.cta}</a>
@@ -108,12 +108,12 @@ export function Footer() {
             <div><b>{site.name}</b><span>{site.tagline}</span></div>
           </div>
           <div>
-            <h4>Explore</h4>
+            <h3>Explore</h3>
             <Link to="/">Home</Link><Link to="/shop">Farm shop</Link><Link to="/seasons">Seasons</Link><Link to="/gallery">Gallery</Link><Link to="/careers">Careers</Link><Link to="/contact">Contact</Link>
           </div>
-          <div><h4>Our farm</h4>{FARM.map((f) => <Link key={f.sub} to={f.to}>{f.label}</Link>)}</div>
+          <div><h3>Our farm</h3>{FARM.map((f) => <Link key={f.sub} to={f.to}>{f.label}</Link>)}</div>
           <div>
-            <h4>Reach us</h4>
+            <h3>Reach us</h3>
             <a href={site.phoneTel}>{site.phoneDisplay}</a>
             <a href={`mailto:${site.email}`}>{site.email}</a>
             <span>{site.addressLine}</span>
@@ -185,7 +185,9 @@ export function AppNav({ route }) {
         <Row href={site.instagram} icon={<Icon name="ig" />} label="Instagram" sub={`@${(site.instagram.split("/").filter(Boolean).pop() || "").replace(/^@/, "")}`} ext />
         <Row href={site.facebook} icon={<Icon name="fb" />} label="Facebook" sub={site.name} ext />
       </Sheet>
-      <a className="fab" href={wa(site.helloMsg)} target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><Icon name="wa" /></a>
+      <div role="complementary" aria-label="Chat on WhatsApp">
+        <a className="fab" href={wa(site.helloMsg)} target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><Icon name="wa" /></a>
+      </div>
     </>
   );
 }

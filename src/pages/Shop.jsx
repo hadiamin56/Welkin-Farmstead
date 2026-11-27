@@ -16,7 +16,7 @@ export default function Shop() {
         <p className="lead">{shop.lead}</p>
         <ShopFilters value={filter} onChange={setFilter} />
         <div className="cards" id="shopGrid">
-          {list.map((p) => <ProductCard key={p.id} p={{ ...p, hidden: filter !== 'all' && p.cat !== filter }} />)}
+          {list.map((p) => <ProductCard key={p.id} level={2} p={{ ...p, hidden: filter !== 'all' && p.cat !== filter }} />)}
         </div>
         <p className="also">Also from the farm: {shop.also.split('·').map((x, i, a) => <span key={x}><b>{x.trim()}</b>{i < a.length - 1 ? ' · ' : ''}</span>)}</p>
       </Sec>

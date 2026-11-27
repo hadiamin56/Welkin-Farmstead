@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "description": "Welkin Farmstead website \u2014 React + Vite, prerendered to static HTML",
+  "description": "Welkin Farmstead website — React + Vite, prerendered to static HTML",
   "scripts": {
     "dev": "vite",
     "build": "node scripts/fetch-content.mjs && vite build && vite build --ssr src/entry-server.jsx --outDir dist-ssr && node scripts/prerender.mjs",
@@ -11,6 +11,7 @@
     "start": "node scripts/dev-server.mjs"
   },
   "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@netlify/blobs": "^8.2.0",
     "leaflet": "1.9.4",
     "react": "18.3.1",

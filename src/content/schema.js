@@ -6,11 +6,13 @@ const U = (k, label, o = {}) => ({ k, t: 'url', label, max: 300, ...o });
 const I = (k, label, o = {}) => ({ k, t: 'image', label, ...o });
 const S = (k, label, options, o = {}) => ({ k, t: 'select', label, options, ...o });
 const B = (k, label, o = {}) => ({ k, t: 'toggle', label, ...o });
+const C = (k, label, o = {}) => ({ k, t: 'color', label, ...o });
 const N = (k, label, min, max, o = {}) => ({ k, t: 'number', label, min, max, ...o });
 const G = (k, label, fields, o = {}) => ({ k, t: 'group', label, fields, ...o });
 const L = (k, label, item, o = {}) => ({ k, t: 'list', label, item, max: 40, ...o });       // list of objects
 const LS = (k, label, o = {}) => ({ k, t: 'list', label, scalar: 'text', max: 40, itemMax: 160, ...o }); // list of strings
 
+export const HOME_BLOCKS = [['strip', 'Scrolling ticker'], ['shop', 'Farm shop teaser'], ['why', 'Why Welkin (dark panel)'], ['journey', 'Journey'], ['farm', 'Four ways we farm'], ['seasons', 'In season now'], ['visit', 'Farm visits teaser'], ['find', 'Find us & map'], ['follow', 'Follow the farm'], ['band', 'Hiring band']];
 export const ICONS_ART = ['tree', 'apple', 'sheep', 'fish', 'wheat', 'sprig', 'cherries', 'apple-branch'];
 export const ICONS_UI = ['leaf', 'fish', 'hand', 'cap'];
 export const PAGES_TO = ['/orchard', '/aquaculture', '/livestock', '/visits', '/shop', '/seasons', '/gallery', '/careers', '/contact'];
@@ -36,6 +38,11 @@ export const ROOT = [
     G('qurbaniCard', 'Qurbani card (phone home page)', [T('title', 'Title'), T('text', 'Text'), T('button', 'Button label', { max: 20 })]),
   ]),
 
+  G('theme', 'Brand colours', [
+    C('green', 'Main brand colour (buttons, links, headings accents)'), C('accent', 'Accent colour (small highlights)'),
+    C('dark', 'Dark panel colour'), C('lime', 'Highlight colour on dark panels'),
+  ]),
+
   G('seo', 'Search & sharing', [
     seoPage('home', 'Home'), seoPage('shop', 'Farm shop'), seoPage('orchard', 'Orchard'), seoPage('aquaculture', 'Aquaculture'),
     seoPage('livestock', 'Livestock'), seoPage('visits', 'Farm visits'), seoPage('seasons', 'Seasons'), seoPage('careers', 'Careers'),
@@ -48,6 +55,7 @@ export const ROOT = [
       T('primary', 'Main button label', { max: 40 }), T('secondary', 'WhatsApp button label', { max: 40 }), A('secondaryMsg', 'WhatsApp message', { max: 400, rows: 2 }),
       I('imageMain', 'Large photo'), T('capMain', 'Large photo caption'), I('imageB', 'Small photo 1'), T('capB', 'Small photo 1 caption'), I('imageC', 'Small photo 2'), T('capC', 'Small photo 2 caption'),
     ]),
+    L('layout', 'Page order & visibility', [S('id', 'Block', HOME_BLOCKS.map((b) => b[0]), { labels: HOME_BLOCKS.map((b) => b[1]) }), B('visible', 'Show on the page')], { itemLabel: 'id', max: 10 }),
     L('facts', 'Quick facts (4 works best)', [T('b', 'Big text', { max: 40 }), T('span', 'Small text', { max: 80 })], { itemLabel: 'b', max: 4 }),
     LS('strip', 'Scrolling ticker words', { max: 20, itemMax: 40 }),
     G('shop', 'Farm shop teaser', [
@@ -138,6 +146,7 @@ export const ROOT = [
 export const SECTIONS = [
   { id: 'site', title: 'Site & contact', icon: 'settings', keys: ['site'], desc: 'Name, phone, WhatsApp number, social links and the announcement bar.' },
   { id: 'home', title: 'Home page', icon: 'home', keys: ['home'], desc: 'Hero, facts, journey, tiles and teasers on the home page.' },
+  { id: 'design', title: 'Design & colours', icon: 'layers', keys: ['theme'], desc: 'Brand colours used across the website.' },
   { id: 'products', title: 'Products', icon: 'bag', keys: ['products'], desc: 'Everything in the farm shop.', custom: 'products' },
   { id: 'shop', title: 'Farm shop page', icon: 'store', keys: ['shop'], desc: 'Text on the shop page.' },
   { id: 'orchard', title: 'Orchard', icon: 'leaf', keys: ['orchard'], desc: 'The orchard page.' },
@@ -153,3 +162,29 @@ export const SECTIONS = [
 ];
 
 export const rootField = (k) => ROOT.find((f) => f.k === k);
+
+/**
+ * Finds the schema field for a content path, e.g. ['products', 2, 'name'].
+ * Returns the field, a readable trail ("Products › #3 › Name") and, when the path is inside a list item,
+ * the item's path and fields so the editor can show the whole card at once.
+ */
+export function resolveField(path) {
+  let fields = ROOT; let f = null; const trail = []; let item = null;
+  for (let i = 0; i < path.length; i += 1) {
+    const k = path[i];
+    if (typeof k === 'number') {
+      if (!f || f.t !== 'list') return null;
+      trail.push(`#${k + 1}`);
+      if (f.scalar) return { field: { k, t: 'text', label: f.label.replace(/ \(.*$/, ''), max: f.itemMax }, trail, item: null };
+      item = { path: path.slice(0, i + 1), fields: f.item, label: f.label };
+      fields = f.item; f = null;
+      continue;
+    }
+    f = fields.find((x) => x.k === k);
+    if (!f) return null;
+    trail.push(f.label.replace(/ \(.*$/, ''));
+    if (f.t === 'group') fields = f.fields;
+    else if (f.t === 'list') fields = f.item || [];
+  }
+  return f ? { field: f, trail, item } : null;
+}

@@ -19,6 +19,19 @@ const clientIp = (req) => (req.headers.get('x-nf-client-connection-ip') || (req.
 const hashKey = (s) => crypto.createHash('sha256').update(s).digest('hex').slice(0, 16);
 
 /* ---------- small helpers ---------- */
+// Serialises operations that read-modify-write shared records (publish, uploads…) so two quick clicks can't interleave.
+const chains = new Map();
+async function withLock(key, fn) {
+  const prev = chains.get(key) || Promise.resolve();
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  chains.set(key, prev.then(() => gate));
+  await prev;
+  try { return await fn(); } finally { release(); if (chains.get(key) === gate) chains.delete(key); }
+}
+const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+// A save must carry a real content document; an empty or malformed request must never reset the draft.
+const hasContent = (c) => isObj(c) && isObj(c.site) && isObj(c.home);
 async function readJson(req, limit = 1_500_000) {
   const text = await req.text();
   if (text.length > limit) throw Object.assign(new Error('Request too large'), { status: 413 });
@@ -47,9 +60,12 @@ async function getPublished(store) {
 }
 
 /* ---------- public ---------- */
-async function publicContent(store) {
+async function publicContent(store, req) {
   const pub = await getPublished(store);
+  const etag = `"v${pub.version}-${pub.publishedAt || 0}"`;
+  if (req.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers: { etag, 'cache-control': 'public, max-age=0, must-revalidate' } });
   return json({ version: pub.version, publishedAt: pub.publishedAt, content: pub.content }, 200, {
+    etag,
     'cache-control': 'public, max-age=0, must-revalidate',
     'netlify-cdn-cache-control': 'public, s-maxage=20, stale-while-revalidate=120',
   });
@@ -95,7 +111,8 @@ async function login(req, store) {
   const email = normEmail(b.email); const password = String(b.password || '');
   if (!email || !password) return err(400, 'Enter your email and password.');
   const rl = await rateLimit(store, `login/${hashKey(clientIp(req) + email)}`, 5, 15 * 60 * 1000);
-  if (rl.blocked) return err(429, `Too many attempts. Try again in ${Math.ceil(rl.retry / 60)} minute(s).`);
+  const rlIp = await rateLimit(store, `login-ip/${hashKey(clientIp(req))}`, 25, 15 * 60 * 1000);
+  if (rl.blocked || rlIp.blocked) return err(429, `Too many attempts. Try again in ${Math.ceil(Math.max(rl.retry, rlIp.retry) / 60)} minute(s).`);
 
   const existing = await store.list('user/');
   let user = await loadUser(store, email);
@@ -112,7 +129,7 @@ async function login(req, store) {
   } else {
     okPw = verifyPassword(password, user ? user.hash : DUMMY) && !!user;
   }
-  if (!okPw) { await bump(store, rl); return err(401, 'Incorrect email or password.'); }
+  if (!okPw) { await bump(store, rl); await bump(store, rlIp); return err(401, 'Incorrect email or password.'); }
   await store.del(rl.k);
   const token = sign({ sub: user.email, pv: user.pv });
   await logActivity(store, user, 'login');
@@ -184,6 +201,7 @@ async function admin(req, url, store) {
     case 'draft': {
       if (method !== 'PUT') break;
       const b = await readJson(req);
+      if (!hasContent(b.content)) return err(400, 'The save did not contain any content, so nothing was changed.');
       const { content, errors } = sanitize(b.content);
       if (errors.length) return err(422, 'Some fields are not valid.', { errors: errors.slice(0, 20) });
       const rec = { content, updatedAt: now(), updatedBy: me.email };
@@ -202,6 +220,7 @@ async function admin(req, url, store) {
     case 'publish': {
       if (method !== 'POST') break;
       const b = await readJson(req, 4000);
+      return withLock('publish', async () => {
       const pub = await getPublished(store);
       const rec = await store.getJSON('draft');
       if (!rec) return err(400, 'There are no unpublished changes.');
@@ -226,6 +245,7 @@ async function admin(req, url, store) {
         try { const r = await fetch(process.env.BUILD_HOOK_URL, { method: 'POST' }); rebuild = r.ok ? 'triggered' : `failed (${r.status})`; } catch { rebuild = 'failed'; }
       }
       return json({ ok: true, version, publishedAt: next.publishedAt, changes: changed.length, rebuild });
+      });
     }
 
     case 'revisions': {
@@ -261,7 +281,9 @@ async function admin(req, url, store) {
       if (!owner) return err(403, 'Only the owner can import.');
       if (method !== 'POST') break;
       const b = await readJson(req);
-      const { content, errors } = sanitize(b.content || b.published || b.draft);
+      const incoming = b.content || b.published || b.draft;
+      if (!hasContent(incoming)) return err(400, 'That file does not look like a Welkin content backup.');
+      const { content, errors } = sanitize(incoming);
       if (errors.length) return err(422, 'Some fields are not valid.', { errors: errors.slice(0, 20) });
       await store.setJSON('draft', { content, updatedAt: now(), updatedBy: me.email });
       await logActivity(store, me, 'import', 'Imported a content backup into the draft');
@@ -273,6 +295,10 @@ async function admin(req, url, store) {
 }
 
 async function adminMedia(req, sub, store, me) {
+  return withLock('media', () => adminMediaLocked(req, sub, store, me));
+}
+
+async function adminMediaLocked(req, sub, store, me) {
   const method = req.method;
   const idx = (await store.getJSON('media-index')) || [];
   if (method === 'GET') {
@@ -410,7 +436,7 @@ export async function handle(req) {
   try {
     const store = await getStore();
     if (p.startsWith('/media/') && req.method === 'GET') return await serveMedia(decodeURIComponent(p.slice(7)), store);
-    if (p === '/api/content' && req.method === 'GET') return await publicContent(store);
+    if (p === '/api/content' && req.method === 'GET') return await publicContent(store, req);
     if (p === '/api/enquiry' && req.method === 'POST') return await enquiry(req, store);
     if (p === '/api/health') return json({ ok: true });
     if (p.startsWith('/api/admin')) return await admin(req, url, store);
