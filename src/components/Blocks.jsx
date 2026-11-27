@@ -6,6 +6,7 @@ export { Fade };
 import { Ph } from './Img.jsx';
 import { BAND_DECO } from '../data/content.js';
 import { wa } from '../lib/site.js';
+import { useContent } from '../content/ContentContext.jsx';
 
 /** A page section. kind: '' | 'tint' | 'dark' | 'aqua'. decos: background drawings. */
 export function Sec({ kind = '', id, decos, children }) {
@@ -70,13 +71,16 @@ export function WaButton({ msg, children, cls = 'btn btn-green' }) {
   return <a className={cls} href={wa(msg)} target="_blank" rel="noopener">{children}</a>;
 }
 
-export const EnqBand = () => (
-  <Band
-    title="Ready to order?"
-    text="Message us on WhatsApp — tell us what you need and we'll reply with availability and rates."
-    action={<WaButton cls="btn btn-light" msg="Salaam Welkin Farmstead! I'd like to place an order.">Order on WhatsApp</WaButton>}
-  />
-);
+export function EnqBand() {
+  const { enq } = useContent();
+  return (
+    <Band
+      title={enq.title}
+      text={enq.text}
+      action={<WaButton cls="btn btn-light" msg={enq.msg}>{enq.button}</WaButton>}
+    />
+  );
+}
 
 export function Crumbs({ trail }) {
   return (

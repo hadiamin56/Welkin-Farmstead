@@ -5,14 +5,19 @@ import { Ph, Img } from './Img.jsx';
 import { Icon } from './Svg.jsx';
 import { Social } from './Shell.jsx';
 import { VB_D } from '../art/generated.js';
-import { CROPS, MONTHS, MONTHS_FULL, FEATURES, TILES, STRIP, FAQ, GALLERY, ROLES, ORDER_ITEMS, SHOP_FILTERS } from '../data/content.js';
+import { MONTHS, MONTHS_FULL, SHOP_FILTERS } from '../data/content.js';
 import { wa } from '../lib/site.js';
+import { logEnquiry } from '../lib/enquiry.js';
+import { useContent } from '../content/ContentContext.jsx';
+
+// Ticker icons cycle in this order (the words are editable).
+const STRIP_ICONS = ['apple', 'fish', 'apple', 'cherry', 'apple', 'apple', 'walnut', 'apple', 'sheep', 'wheat'];
 
 /* ---------- products ---------- */
 export function ProductCard({ p }) {
   return (
     <Fade as="article" className="card" data-cat={p.cat} hidden={p.hidden || undefined}>
-      <Ph file={p.file} cap={p.name} sizes="(min-width:980px) 270px, 50vw" />
+      <Ph file={p.image} cap={p.name} sizes="(min-width:980px) 270px, 50vw" />
       <div className="cb">
         <h3>{p.name}</h3>
         <p>{p.text}</p>
@@ -43,11 +48,12 @@ export function ShopFilters({ value, onChange }) {
 }
 
 export function Tiles() {
+  const { home } = useContent();
   return (
     <div className="tiles">
-      {TILES.map((t) => (
-        <Fade as={Link} className="tile" to={t.to} key={t.to}>
-          <Img file={t.file} alt={t.title} sizes="(min-width:980px) 270px, 50vw" />
+      {home.farm.tiles.map((t) => (
+        <Fade as={Link} className="tile" to={t.to} key={`${t.to}${t.title}`}>
+          <Img file={t.image} alt={t.title} sizes="(min-width:980px) 270px, 50vw" />
           <div className="tt"><h3>{t.title}</h3><p>{t.text}</p><span>Explore →</span></div>
         </Fade>
       ))}
@@ -56,9 +62,10 @@ export function Tiles() {
 }
 
 export function Features() {
+  const { home } = useContent();
   return (
     <div className="feats">
-      {FEATURES.map((f, i) => (
+      {home.why.items.map((f, i) => (
         <div className="feat" key={f.title}>
           <span className="num">{`0${i + 1}`}</span>
           <span className="ic"><Icon name={f.icon} /></span>
@@ -72,8 +79,9 @@ export function Features() {
 
 /** Scrolling ticker of what we grow. Decorative, so hidden from screen readers. */
 export function Strip() {
-  const one = (k) => STRIP.words.map((w, i) => {
-    const ic = STRIP.icons[i];
+  const { home } = useContent();
+  const one = (k) => home.strip.map((w, i) => {
+    const ic = STRIP_ICONS[i % STRIP_ICONS.length];
     const [vw, vh] = VB_D[ic];
     return <span key={`${k}${w}`}><svg viewBox={`0 0 ${vw} ${vh}`} aria-hidden="true"><use href={`#d-${ic}`} /></svg>{w}</span>;
   });
@@ -81,19 +89,21 @@ export function Strip() {
 }
 
 export function Faq() {
+  const { faq } = useContent();
   return (
     <div className="faq">
-      {FAQ.map((f) => <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}
+      {faq.map((f) => <details key={f.q}><summary>{f.q}</summary><p>{f.a}</p></details>)}
     </div>
   );
 }
 
 export function FollowBand() {
+  const { home } = useContent();
   return (
     <section className="sec">
       <div className="wrap">
         <div className="follow">
-          <div><h2>Follow the farm</h2><p>Daily updates, harvests and new arrivals on Instagram and Facebook.</p></div>
+          <div><h2>{home.follow.title}</h2><p>{home.follow.text}</p></div>
           <Social big />
         </div>
       </div>
@@ -102,12 +112,13 @@ export function FollowBand() {
 }
 
 export function Roles() {
+  const { roles, careersPage } = useContent();
   return (
     <div className="roles">
-      {ROLES.map((r) => (
+      {roles.filter((r) => r.open).map((r) => (
         <Fade className="role" key={r.t}>
           <div><h3>{r.t}</h3><p>{r.d}</p></div>
-          <a className="btn btn-ghost btn-sm" href={wa(`Salaam Welkin Farmstead! I am interested in the ${r.t} role. My name is ___ and I have ___ experience.`)} target="_blank" rel="noopener">Apply</a>
+          <a className="btn btn-ghost btn-sm" href={wa(careersPage.applyMsg.replace('{role}', r.t))} target="_blank" rel="noopener">{careersPage.apply}</a>
         </Fade>
       ))}
     </div>
@@ -116,8 +127,9 @@ export function Roles() {
 
 /* ---------- seasons ---------- */
 export function SeasonItems({ month }) {
+  const { crops } = useContent();
   if (month === null) return null;
-  const items = CROPS.filter((c) => month >= c[2] && month <= c[3]);
+  const items = crops.filter((c) => month >= c.from && month <= c.to).map((c) => [c.name, c.note, c.from, c.to]);
   if (!items.length) return <li className="empty">Nothing listed for {MONTHS_FULL[month]}.</li>;
   return items.map(([name, note, from, to]) => {
     const all = from === 0 && to === 11;
@@ -169,6 +181,7 @@ export function SeasonPicker() {
 const openWa = (text) => window.open(wa(text), '_blank', 'noopener');
 
 export function OrderForm() {
+  const { orderItems, site } = useContent();
   const [picked, setPicked] = useState([]);
   const toggle = (v) => setPicked((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const submit = (e) => {
@@ -176,9 +189,10 @@ export function OrderForm() {
     const f = e.currentTarget;
     const name = f.elements.name.value.trim();
     const note = f.elements.note.value.trim();
-    let msg = `Salaam Welkin Farmstead! ${name ? `I'm ${name}. ` : ''}`;
+    let msg = `Salaam ${site.name}! ${name ? `I'm ${name}. ` : ''}`;
     msg += picked.length ? `I'd like to enquire about: ${picked.join(', ')}.` : "I'd like to know more about your farm.";
     if (note) msg += ` ${note}`;
+    logEnquiry({ type: 'order', name, items: picked, note, hp: f.elements.website ? f.elements.website.value : '' });
     openWa(msg);
   };
   return (
@@ -187,23 +201,26 @@ export function OrderForm() {
       <fieldset>
         <legend>I'm interested in</legend>
         <div className="opts" id="opts">
-          {ORDER_ITEMS.map((i) => (
+          {orderItems.map((i) => (
             <label className="opt" key={i}><input type="checkbox" value={i} checked={picked.includes(i)} onChange={() => toggle(i)} /><span>{i}</span></label>
           ))}
         </div>
       </fieldset>
       <label className="fld"><span>Notes (quantity, date, city)</span><textarea name="note" rows={3} placeholder="e.g. 2 boxes of apples, deliver to Srinagar" /></label>
+      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
       <button className="btn btn-green wide" type="submit">Send on WhatsApp</button>
     </Fade>
   );
 }
 
 export function VisitForm() {
+  const { site } = useContent();
   const submit = (e) => {
     e.preventDefault();
     const f = e.currentTarget.elements;
     const o = f.org.value.trim(); const n = f.n.value.trim(); const d = f.d.value.trim();
-    openWa(`Salaam Welkin Farmstead! We'd like to arrange a farm visit${o ? ` for ${o}` : ''}${n ? ` — about ${n} students` : ''}${d ? `, around ${d}` : ''}. Please share availability and details.`);
+    logEnquiry({ type: 'visit', org: o, n, d });
+    openWa(`Salaam ${site.name}! We'd like to arrange a farm visit${o ? ` for ${o}` : ''}${n ? ` — about ${n} students` : ''}${d ? `, around ${d}` : ''}. Please share availability and details.`);
   };
   return (
     <Fade as="form" className="form" id="visitForm" onSubmit={submit}>
@@ -217,6 +234,7 @@ export function VisitForm() {
 
 /* ---------- gallery with lightbox ---------- */
 export function GalleryGrid() {
+  const { gallery: GALLERY } = useContent();
   const [open, setOpen] = useState(null); // index or null
   const closeRef = useRef(null);
   const n = GALLERY.length;
@@ -245,8 +263,8 @@ export function GalleryGrid() {
     <>
       <div className="gal">
         {GALLERY.map((g, i) => (
-          <a key={g.file} href={`/assets/photos/${g.file}`} data-cap={g.cap} onClick={(e) => { e.preventDefault(); setOpen(i); }}>
-            <span className="gimg"><Img file={g.file} alt={g.cap} sizes="(min-width:980px) 360px, 50vw" /></span>
+          <a key={`${g.image}${i}`} href={g.image} data-cap={g.cap} onClick={(e) => { e.preventDefault(); setOpen(i); }}>
+            <span className="gimg"><Img file={g.image} alt={g.cap} sizes="(min-width:980px) 360px, 50vw" /></span>
             <span className="gcap">{g.cap}</span>
           </a>
         ))}
@@ -259,7 +277,7 @@ export function GalleryGrid() {
       >
         <button className="x" aria-label="Close" ref={closeRef} onClick={() => setOpen(null)}>✕</button>
         <button className="pv" aria-label="Previous" onClick={() => move(-1)}>‹</button>
-        <figure><img alt={cur ? cur.cap : ''} src={cur ? `/assets/photos/${cur.file}` : undefined} /><figcaption>{cur ? cur.cap : ''}</figcaption></figure>
+        <figure><img alt={cur ? cur.cap : ''} src={cur ? cur.image : undefined} /><figcaption>{cur ? cur.cap : ''}</figcaption></figure>
         <button className="nx" aria-label="Next" onClick={() => move(1)}>›</button>
       </div>
     </>

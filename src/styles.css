@@ -631,3 +631,7 @@ html.lock{overflow:hidden}
 @media (max-width:360px){
   .cards.c3 .card{flex-basis:84%}
 }
+
+/* admin preview ribbon (only shown to a signed-in admin previewing a draft) */
+.preview-ribbon{position:fixed;left:50%;top:10px;translate:-50% 0;z-index:300;background:#17261c;color:#fff;font:600 .8rem var(--font);padding:.45rem .5rem .45rem 1rem;border-radius:99px;box-shadow:0 6px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:.8rem;white-space:nowrap}
+.preview-ribbon button{background:#8dc63f;color:#123d27;border:0;border-radius:99px;font:700 .78rem var(--font);padding:.35rem .8rem;cursor:pointer}

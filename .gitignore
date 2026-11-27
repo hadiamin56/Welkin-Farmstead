@@ -4,3 +4,5 @@ dist-ssr
 __pycache__
 *.log
 .DS_Store
+src/content/live.json
+.data

@@ -4,8 +4,9 @@ import { Sprites } from './Svg.jsx';
 import { Decos } from './Deco.jsx';
 import { Header, Footer, AppNav } from './Shell.jsx';
 import { ScrollTools } from './Parts.jsx';
-import { findRoute, OG_IMAGE } from '../data/routes.js';
+import { findRoute } from '../data/routes.js';
 import { PAGE_DECOS } from '../data/content.js';
+import { useContent, usePreview } from '../content/ContentContext.jsx';
 
 function setMeta(selector, attr, value) {
   const el = document.head.querySelector(selector);
@@ -22,7 +23,7 @@ function useRouteEffects(route) {
     setMeta('meta[name="description"]', 'content', route.desc);
     setMeta('meta[property="og:title"]', 'content', route.title);
     setMeta('meta[property="og:description"]', 'content', route.desc);
-    setMeta('meta[property="og:image"]', 'content', OG_IMAGE);
+    setMeta('meta[property="og:image"]', 'content', route.og);
     document.body.setAttribute('data-page', route.active);
   }, [route]);
 
@@ -34,7 +35,9 @@ function useRouteEffects(route) {
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const route = findRoute(pathname);
+  const content = useContent();
+  const { preview, exitPreview } = usePreview();
+  const route = findRoute(pathname, content);
   useRouteEffects(route);
   const pdeco = PAGE_DECOS[route.path];
   return (
@@ -48,6 +51,12 @@ export default function Layout() {
       <Footer />
       <AppNav route={route} />
       <ScrollTools />
+      {preview && (
+        <div className="preview-ribbon" role="status">
+          Previewing unpublished changes
+          <button type="button" onClick={exitPreview}>Exit preview</button>
+        </div>
+      )}
     </>
   );
 }
