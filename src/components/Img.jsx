@@ -18,7 +18,11 @@ export function Img({ file, alt, sizes = '100vw', eager = false }) {
   const { w, h, small } = describe(file);
   const srcSet = small && w ? `${small} 800w, ${file} ${w}w` : undefined;
   const load = eager ? { fetchpriority: 'high' } : { loading: 'lazy', decoding: 'async' };
-  return <img src={file} srcSet={srcSet} sizes={srcSet ? sizes : undefined} alt={alt} width={w} height={h} {...load} />;
+  const img = <img src={file} srcSet={srcSet} sizes={srcSet ? sizes : undefined} alt={alt} width={w} height={h} {...load} />;
+  if (!/^\/assets\/photos\/.+\.jpg$/.test(file)) return img;
+  const wp = (x) => x.replace(/\.jpg$/, '.webp');
+  const ws = small && w ? `${wp(small)} 800w, ${wp(file)} ${w}w` : wp(file);
+  return <picture><source type="image/webp" srcSet={ws} sizes={srcSet ? sizes : undefined} />{img}</picture>;
 }
 
 /** Photo in the rounded frame, with an optional caption chip. */

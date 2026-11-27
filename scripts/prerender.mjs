@@ -6,12 +6,22 @@ import { pathToFileURL } from 'node:url';
 
 const dist = path.resolve('dist');
 const template = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
-const { render, routeList } = await import(pathToFileURL(path.resolve('dist-ssr/entry-server.js')).href);
+const { render, routeList, themeStyle } = await import(pathToFileURL(path.resolve('dist-ssr/entry-server.js')).href);
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+const cssFile = (template.match(/href="(\/static\/index-[^"]+\.css)"/) || [])[1];
+let fontLinks = '';
+if (cssFile) {
+  const css = fs.readFileSync(path.join(dist, cssFile), 'utf8');
+  fontLinks = [...css.matchAll(/url\(([^)]*plus-jakarta-sans-latin-(?:400|600)-normal-[^)]+\.woff2)\)/g)]
+    .map((m) => `<link rel="preload" as="font" type="font/woff2" crossorigin href="${m[1].replace(/['"]/g, '')}">`).join('\n');
+}
 function head(html, r) {
+  const theme = themeStyle();
   return html
+    .replace('</head>', fontLinks ? `${fontLinks}\n</head>` : '</head>')
+    .replace('</head>', theme ? `<style id="welkin-theme">${theme}</style>\n</head>` : '</head>')
     .replace(/<title>.*?<\/title>/s, `<title>${esc(r.title)}</title>`)
     .replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc(r.desc)}$2`)
     .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(r.title)}$2`)

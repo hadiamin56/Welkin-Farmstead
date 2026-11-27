@@ -33,6 +33,11 @@ export function AdminProvider({ children }) {
   const draftRef = useRef(null);
   const timer = useRef(null);
   const dirty = useRef(false);
+  const past = useRef([]);
+  const future = useRef([]);
+  const lastPush = useRef(0);
+  const lastKey = useRef(null);
+  const [hist, setHist] = useState({ u: 0, r: 0 });
 
   const signOut = useCallback(() => { setUser(null); setDoc(null); draftRef.current = null; }, []);
   useEffect(() => { setUnauthorizedHandler(signOut); }, [signOut]);
@@ -46,6 +51,7 @@ export function AdminProvider({ children }) {
     const d = await api('GET', 'content');
     draftRef.current = d.draft;
     dirty.current = false;
+    past.current = []; future.current = []; setHist({ u: 0, r: 0 });
     setDoc(d);
     setSaveState(d.hasDraft ? 'saved' : 'idle');
     setSaveErrors([]);
@@ -79,14 +85,35 @@ export function AdminProvider({ children }) {
     timer.current = setTimeout(saveNow, 1200);
   }, [saveNow]);
 
-  const change = useCallback((fn) => {
-    const next = fn(draftRef.current);
+  const change = useCallback((fn, key) => {
+    const prev = draftRef.current;
+    const next = fn(prev);
+    // typing in the same field counts as one undo step; anything else is its own step
+    const t = Date.now();
+    if (!(key && key === lastKey.current && t - lastPush.current < 1500)) { past.current.push(prev); if (past.current.length > 80) past.current.shift(); }
+    lastPush.current = t;
+    lastKey.current = key || null;
+    future.current = [];
+    setHist({ u: past.current.length, r: 0 });
     draftRef.current = next;
     setDoc((d) => d && ({ ...d, draft: next }));
     schedule();
   }, [schedule]);
 
-  const setValue = useCallback((path, value) => change((d) => setAt(d, path, value)), [change]);
+  const setValue = useCallback((path, value) => change((d) => setAt(d, path, value), path.join('.')), [change]);
+
+  const jump = useCallback((from, to) => {
+    if (!from.current.length) return;
+    to.current.push(draftRef.current);
+    const next = from.current.pop();
+    draftRef.current = next;
+    lastPush.current = 0; lastKey.current = null;
+    setDoc((d) => d && ({ ...d, draft: next }));
+    setHist({ u: past.current.length, r: future.current.length });
+    schedule();
+  }, [schedule]);
+  const undo = useCallback(() => jump(past, future), [jump]);
+  const redo = useCallback(() => jump(future, past), [jump]);
 
   const resetSection = useCallback((keys) => change((d) => keys.reduce((acc, k) => setAt(acc, [k], JSON.parse(JSON.stringify(doc.defaults[k]))), d)), [change, doc]);
 
@@ -113,7 +140,7 @@ export function AdminProvider({ children }) {
   const changedPaths = useMemo(() => (doc ? diffPaths(doc.publishedContent || {}, doc.draft) : []), [doc]);
 
   const value = {
-    user, setUser, doc, saveState, saveErrors, load, saveNow, setValue, change, resetSection, publish, discard, logout,
+    user, setUser, doc, saveState, saveErrors, load, saveNow, setValue, change, resetSection, publish, discard, logout, undo, redo, hist,
     changes: doc ? doc.changes : 0, changedPaths,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

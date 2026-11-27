@@ -7,6 +7,7 @@ import { AdminProvider, useAdmin, sectionOf } from './state.jsx';
 import { api } from './api.js';
 import { SECTIONS } from '../content/schema.js';
 import { Dashboard, Editor, Products, Media, Enquiries, History, Users, Account } from './pages.jsx';
+import VisualEditor from './VisualEditor.jsx';
 
 function Login() {
   const { setUser } = useAdmin();
@@ -126,6 +127,7 @@ function Shell() {
         <nav aria-label="Admin">
           <p className="a-nav-h">Overview</p>
           {item('/admin', 'dashboard', 'Dashboard')}
+          {item('/admin/visual', 'eye', 'Visual editor')}
           <p className="a-nav-h">Website content</p>
           {SECTIONS.map((s) => item(s.custom === 'products' ? '/admin/products' : `/admin/content/${s.id}`, s.icon, s.title))}
           <p className="a-nav-h">Library & inbox</p>
@@ -152,10 +154,11 @@ function Shell() {
           <Btn icon="eye" onClick={preview} disabled={!doc}>Preview</Btn>
           <Btn kind="primary" icon="upload" onClick={() => setPublishing(true)} disabled={!doc}>Publish{changes ? ` (${changes})` : ''}</Btn>
         </header>
-        <main className="a-content">
+        <main className={`a-content${loc.pathname.startsWith('/admin/visual') ? ' wide' : ''}`}>
           {!doc ? <div className="a-loading"><span className="a-spin" /> Loading…</div> : (
             <Routes>
               <Route index element={<Dashboard />} />
+              <Route path="visual" element={<VisualEditor />} />
               <Route path="content/:id" element={<Editor />} />
               <Route path="products" element={<Products />} />
               <Route path="media" element={<Media />} />

@@ -20,7 +20,7 @@ export function FindUs() {
     const el = elRef.current;
     let io; let dead = false;
     const start = async () => {
-      const mod = await import('leaflet');
+      const [mod] = await Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css')]);
       const L = mod.default || mod;
       if (dead || apiRef.current) return;
       const l0 = locRef.current[selRef.current] || locRef.current[0];

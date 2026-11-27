@@ -14,12 +14,13 @@ import { useContent } from '../content/ContentContext.jsx';
 const STRIP_ICONS = ['apple', 'fish', 'apple', 'cherry', 'apple', 'apple', 'walnut', 'apple', 'sheep', 'wheat'];
 
 /* ---------- products ---------- */
-export function ProductCard({ p }) {
+export function ProductCard({ p, level = 3 }) {
+  const H = `h${level}`;
   return (
     <Fade as="article" className="card" data-cat={p.cat} hidden={p.hidden || undefined}>
       <Ph file={p.image} cap={p.name} sizes="(min-width:980px) 270px, 50vw" />
       <div className="cb">
-        <h3>{p.name}</h3>
+        <H>{p.name}</H>
         <p>{p.text}</p>
         <a className="link" href={wa(p.msg)} target="_blank" rel="noopener">Enquire on WhatsApp →</a>
       </div>
@@ -117,7 +118,7 @@ export function Roles() {
     <div className="roles">
       {roles.filter((r) => r.open).map((r) => (
         <Fade className="role" key={r.t}>
-          <div><h3>{r.t}</h3><p>{r.d}</p></div>
+          <div><h3 aria-level={2}>{r.t}</h3><p>{r.d}</p></div>
           <a className="btn btn-ghost btn-sm" href={wa(careersPage.applyMsg.replace('{role}', r.t))} target="_blank" rel="noopener">{careersPage.apply}</a>
         </Fade>
       ))}
@@ -264,7 +265,7 @@ export function GalleryGrid() {
       <div className="gal">
         {GALLERY.map((g, i) => (
           <a key={`${g.image}${i}`} href={g.image} data-cap={g.cap} onClick={(e) => { e.preventDefault(); setOpen(i); }}>
-            <span className="gimg"><Img file={g.image} alt={g.cap} sizes="(min-width:980px) 360px, 50vw" /></span>
+            <span className="gimg"><Img file={g.image} alt="" sizes="(min-width:980px) 360px, 50vw" /></span>
             <span className="gcap">{g.cap}</span>
           </a>
         ))}
@@ -277,7 +278,7 @@ export function GalleryGrid() {
       >
         <button className="x" aria-label="Close" ref={closeRef} onClick={() => setOpen(null)}>✕</button>
         <button className="pv" aria-label="Previous" onClick={() => move(-1)}>‹</button>
-        <figure><img alt={cur ? cur.cap : ''} src={cur ? cur.image : undefined} /><figcaption>{cur ? cur.cap : ''}</figcaption></figure>
+        <figure>{cur && <img alt={cur.cap} src={cur.image} />}<figcaption>{cur ? cur.cap : ''}</figcaption></figure>
         <button className="nx" aria-label="Next" onClick={() => move(1)}>›</button>
       </div>
     </>

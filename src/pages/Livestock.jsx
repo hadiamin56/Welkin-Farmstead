@@ -15,7 +15,7 @@ export default function Livestock() {
       />
       <Sec>
         <Sh eyebrow={l.breedsHead.eyebrow} title={l.breedsHead.title} />
-        <div className="cards c3">{l.breeds.map((b, i) => <InfoCard key={b.title + i} file={b.image} title={b.title} text={b.text} sizes="(min-width:980px) 360px, 50vw" />)}</div>
+        <div className="cards c3" tabIndex={0} role="region" aria-label={l.breedsHead.title}>{l.breeds.map((b, i) => <InfoCard key={b.title + i} file={b.image} title={b.title} text={b.text} sizes="(min-width:980px) 360px, 50vw" />)}</div>
         <p className="also">We also supply <b>{l.milk}</b> from our herd — message us for details.</p>
       </Sec>
       <Sec kind="tint" decos={[D('wheat', 'br', 150, 5, 'bottom:0;right:3%'), D('sheep', 'tl', 190, 0, 'top:20px;left:3%')]}>

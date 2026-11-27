@@ -34,7 +34,7 @@ export function Dashboard() {
   }
   return (
     <>
-      <Head title={`Welcome back, ${user.name}`} sub="Everything on the Welkin website is managed from here." />
+      <Head title={`Welcome back, ${user.name}`} sub="Everything on the Welkin website is managed from here."><Link className="a-btn primary" to="/admin/visual"><Ico n="eye" size={17} /> Open the visual editor</Link></Head>
       {warnings.length > 0 && <div className="a-alert warn"><Ico n="alert" size={18} /><div>{warnings.map((w) => <p key={w}>{w}</p>)}</div></div>}
       <div className="a-stats">
         <div className="a-stat"><span>Live version</span><b>{doc.published.version ? `v${doc.published.version}` : 'Built-in'}</b><small>{doc.published.publishedAt ? `Published ${ago(doc.published.publishedAt)}` : 'Nothing published from admin yet'}</small></div>

@@ -26,6 +26,8 @@ export const DEFAULTS = {
     helloMsg: "Salaam Welkin Farmstead! I'd like to know more.",
   },
 
+  theme: { green: '#1f5a3a', accent: '#c4382c', dark: '#123d27', lime: '#8dc63f' },
+
   seo: {
     home: { title: 'Welkin Farmstead — Where Goodness Grows · Sopore, Kashmir', desc: 'Welkin Farmstead in Sopore, Kashmir: apple orchards, rainbow trout, sheep, bulls, milk, Qurbani bookings and student farm visits.' },
     shop: { title: 'Farm shop · Welkin Farmstead', desc: 'Shop apples, cherries, Ruby Nectarines, walnuts, rainbow trout, Dumba and Merino sheep and bulls from Welkin Farmstead, Sopore.' },
@@ -52,6 +54,12 @@ export const DEFAULTS = {
       imageB: P('trout.jpg'), capB: 'Rainbow trout',
       imageC: P('sheep.jpg'), capC: 'Dumba sheep',
     },
+    // Order and visibility of the home page blocks below the top section.
+    layout: [
+      { id: 'strip', visible: true }, { id: 'shop', visible: true }, { id: 'why', visible: true }, { id: 'journey', visible: true },
+      { id: 'farm', visible: true }, { id: 'seasons', visible: true }, { id: 'visit', visible: true }, { id: 'find', visible: true },
+      { id: 'follow', visible: true }, { id: 'band', visible: true },
+    ],
     facts: [
       { b: '7', span: 'orchard crops — apples to kiwi' },
       { b: 'RAS', span: 'recirculating-tank rainbow trout' },

@@ -11,6 +11,53 @@ import { useContent } from '../content/ContentContext.jsx';
 export default function Home() {
   const { home: h, products, site } = useContent();
   const featured = h.shop.featured.map((id) => products.find((p) => p.id === id)).filter((p) => p && p.visible);
+
+  const blocks = {
+    strip: <Strip key="strip" />,
+    shop: (
+      <Sec key="shop">
+        <Sh eyebrow={h.shop.eyebrow} title={h.shop.title} sub={h.shop.sub} />
+        <div className="cards">{featured.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+        <p className="more"><Link className="btn btn-ghost" to="/shop">{h.shop.seeAll}</Link></p>
+      </Sec>
+    ),
+    why: (
+      <Sec key="why" kind="dark" decos={[D('sprig', 'tl', 280, -6, 'top:-20px;left:-40px'), D('apple-branch', 'br', 520, 0, 'bottom:-60px;right:-60px')]}>
+        <Sh eyebrow={h.why.eyebrow} title={<>{h.why.title} <em>{h.why.accent}</em></>} />
+        <Features />
+      </Sec>
+    ),
+    journey: <Journey key="journey" />,
+    farm: (
+      <Sec key="farm" kind="tint" decos={[D('wheat', 'br', 190, 6, 'bottom:-10px;right:2%'), D('cherries', 'tr', 130, 10, 'top:30px;right:5%')]}>
+        <Sh eyebrow={h.farm.eyebrow} title={h.farm.title} />
+        <Tiles />
+      </Sec>
+    ),
+    seasons: (
+      <Sec key="seasons" decos={[D('sprig', 'tr', 200, 14, 'top:10px;right:0')]}>
+        <Sh eyebrow={h.seasons.eyebrow} title={h.seasons.title} sub={h.seasons.sub} />
+        <SeasonList />
+        <p className="more"><Link className="btn btn-ghost" to="/seasons">{h.seasons.link}</Link></p>
+      </Sec>
+    ),
+    visit: (
+      <Sec key="visit" kind="tint" decos={[D('tree', 'bl', 150, 0, 'bottom:10px;left:2%'), D('wheat', 'tr', 110, 8, 'top:20px;right:3%')]}>
+        <Split
+          left={<>
+            <p className="eyebrow">{h.visit.eyebrow}</p>
+            <h2>{h.visit.title}</h2>
+            <p className="sub">{h.visit.sub}</p>
+            <p><Link className="btn btn-green" to="/visits">{h.visit.button}</Link></p>
+          </>}
+          right={<Ph file={h.visit.image} cap={h.visit.cap} sizes="(min-width:980px) 560px, 100vw" />}
+        />
+      </Sec>
+    ),
+    find: <Sec key="find"><FindUs /></Sec>,
+    follow: <FollowBand key="follow" />,
+    band: <Band key="band" title={h.band.title} text={h.band.text} action={<Link className="btn btn-light" to="/careers">{h.band.button}</Link>} />,
+  };
   return (
     <>
       <section className="hero">
@@ -43,47 +90,7 @@ export default function Home() {
         </div>
       </div>
 
-      <Strip />
-
-      <Sec>
-        <Sh eyebrow={h.shop.eyebrow} title={h.shop.title} sub={h.shop.sub} />
-        <div className="cards">{featured.map((p) => <ProductCard key={p.id} p={p} />)}</div>
-        <p className="more"><Link className="btn btn-ghost" to="/shop">{h.shop.seeAll}</Link></p>
-      </Sec>
-
-      <Sec kind="dark" decos={[D('sprig', 'tl', 280, -6, 'top:-20px;left:-40px'), D('apple-branch', 'br', 520, 0, 'bottom:-60px;right:-60px')]}>
-        <Sh eyebrow={h.why.eyebrow} title={<>{h.why.title} <em>{h.why.accent}</em></>} />
-        <Features />
-      </Sec>
-
-      <Journey />
-
-      <Sec kind="tint" decos={[D('wheat', 'br', 190, 6, 'bottom:-10px;right:2%'), D('cherries', 'tr', 130, 10, 'top:30px;right:5%')]}>
-        <Sh eyebrow={h.farm.eyebrow} title={h.farm.title} />
-        <Tiles />
-      </Sec>
-
-      <Sec decos={[D('sprig', 'tr', 200, 14, 'top:10px;right:0')]}>
-        <Sh eyebrow={h.seasons.eyebrow} title={h.seasons.title} sub={h.seasons.sub} />
-        <SeasonList />
-        <p className="more"><Link className="btn btn-ghost" to="/seasons">{h.seasons.link}</Link></p>
-      </Sec>
-
-      <Sec kind="tint" decos={[D('tree', 'bl', 150, 0, 'bottom:10px;left:2%'), D('wheat', 'tr', 110, 8, 'top:20px;right:3%')]}>
-        <Split
-          left={<>
-            <p className="eyebrow">{h.visit.eyebrow}</p>
-            <h2>{h.visit.title}</h2>
-            <p className="sub">{h.visit.sub}</p>
-            <p><Link className="btn btn-green" to="/visits">{h.visit.button}</Link></p>
-          </>}
-          right={<Ph file={h.visit.image} cap={h.visit.cap} sizes="(min-width:980px) 560px, 100vw" />}
-        />
-      </Sec>
-
-      <Sec><FindUs /></Sec>
-      <FollowBand />
-      <Band title={h.band.title} text={h.band.text} action={<Link className="btn btn-light" to="/careers">{h.band.button}</Link>} />
+      {h.layout.filter((b) => b.visible && blocks[b.id]).map((b) => blocks[b.id])}
     </>
   );
 }
