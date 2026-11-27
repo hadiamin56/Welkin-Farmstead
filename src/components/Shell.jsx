@@ -2,23 +2,24 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { Icon, AIcon, Skyline } from './Svg.jsx';
 import { NAV, FARM } from '../data/content.js';
-import { wa, PHONE_TEL, EMAIL, INSTAGRAM, FACEBOOK } from '../lib/site.js';
-
-const QURBANI_MSG = "Salaam Welkin Farmstead! I'd like to book an animal for Eid-ul-Adha Qurbani.";
-const HELLO_MSG = "Salaam Welkin Farmstead! I'd like to know more.";
+import { wa } from '../lib/site.js';
+import { useSite } from '../content/ContentContext.jsx';
 
 export function Social({ big = false }) {
+  const site = useSite();
   return (
     <div className={`social${big ? ' big' : ''}`}>
-      <a href={INSTAGRAM} target="_blank" rel="noopener" aria-label="Instagram"><Icon name="ig" /></a>
-      <a href={FACEBOOK} target="_blank" rel="noopener" aria-label="Facebook"><Icon name="fb" /></a>
-      <a href={wa(HELLO_MSG)} target="_blank" rel="noopener" aria-label="WhatsApp"><Icon name="wa" /></a>
+      <a href={site.instagram} target="_blank" rel="noopener" aria-label="Instagram"><Icon name="ig" /></a>
+      <a href={site.facebook} target="_blank" rel="noopener" aria-label="Facebook"><Icon name="fb" /></a>
+      <a href={wa(site.helloMsg)} target="_blank" rel="noopener" aria-label="WhatsApp"><Icon name="wa" /></a>
     </div>
   );
 }
 
 /** Announcement bar, top bar (desktop nav / mobile app bar) and its dropdown. */
 export function Header({ route }) {
+  const site = useSite();
+  const ann = site.announcement;
   const [menu, setMenu] = useState(false);
   const [ddOpen, setDdOpen] = useState(false);
   const navigate = useNavigate();
@@ -52,15 +53,17 @@ export function Header({ route }) {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      <div className="annc" id="annc">
-        <div className="wrap">
-          <span>Eid-ul-Adha Qurbani bookings are open</span>
-          <a href={wa(QURBANI_MSG)} target="_blank" rel="noopener">Book on WhatsApp →</a>
+      {ann.enabled && (
+        <div className="annc" id="annc">
+          <div className="wrap">
+            <span>{ann.text}</span>
+            <a href={wa(ann.msg)} target="_blank" rel="noopener">{ann.cta}</a>
+          </div>
         </div>
-      </div>
+      )}
       <header className="nav" id="nav">
         <div className="wrap nav-in">
-          <Link to="/" className="brand"><img src="/assets/logo.png" alt="" width="40" height="40" /><span>Welkin Farmstead</span></Link>
+          <Link to="/" className="brand"><img src="/assets/logo.png" alt="" width="40" height="40" /><span>{site.name}</span></Link>
           <Link className="ab-back" to="/" aria-label="Back" onClick={onBack}><Icon name="back" /></Link>
           <span className="ab-title">{route.navTitle}</span>
           <nav className={`links${menu ? ' open' : ''}`} id="links" aria-label="Main">
@@ -86,7 +89,7 @@ export function Header({ route }) {
           </nav>
           <Link className="btn btn-sm btn-green nav-cta" to="/contact">Order</Link>
           <button className="burger" id="burger" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} aria-controls="links" onClick={() => setMenu((m) => !m)}><i /><i /></button>
-          <a className="ab-act" href={PHONE_TEL} aria-label="Call Welkin Farmstead"><Icon name="call" /></a>
+          <a className="ab-act" href={site.phoneTel} aria-label={`Call ${site.name}`}><Icon name="call" /></a>
         </div>
       </header>
     </>
@@ -94,14 +97,15 @@ export function Header({ route }) {
 }
 
 export function Footer() {
+  const site = useSite();
   return (
     <>
       <Skyline />
       <footer className="footer">
         <div className="wrap fgrid">
           <div className="fb">
-            <img src="/assets/logo.png" alt="Welkin Farmstead logo" width="56" height="56" loading="lazy" />
-            <div><b>Welkin Farmstead</b><span>Where goodness grows.</span></div>
+            <img src="/assets/logo.png" alt={`${site.name} logo`} width="56" height="56" loading="lazy" />
+            <div><b>{site.name}</b><span>{site.tagline}</span></div>
           </div>
           <div>
             <h4>Explore</h4>
@@ -110,13 +114,13 @@ export function Footer() {
           <div><h4>Our farm</h4>{FARM.map((f) => <Link key={f.sub} to={f.to}>{f.label}</Link>)}</div>
           <div>
             <h4>Reach us</h4>
-            <a href={PHONE_TEL}>70069 01374</a>
-            <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-            <span>Sopore, Kashmir 193201</span>
+            <a href={site.phoneTel}>{site.phoneDisplay}</a>
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+            <span>{site.addressLine}</span>
             <Social />
           </div>
         </div>
-        <div className="wrap fcopy">© <span id="yr" suppressHydrationWarning>{new Date().getFullYear()}</span> Welkin Farmstead · Managed by Waseem Anayat Hajini</div>
+        <div className="wrap fcopy">© <span id="yr" suppressHydrationWarning>{new Date().getFullYear()}</span>{` ${site.name} · Managed by ${site.managedBy}`}</div>
       </footer>
     </>
   );
@@ -124,6 +128,7 @@ export function Footer() {
 
 /** Phone-only navigation: bottom bar, bottom sheets and the WhatsApp button. */
 export function AppNav({ route }) {
+  const site = useSite();
   const [sheet, setSheet] = useState(null);
   const { pathname } = useLocation();
   const cur = { home: 'home', shop: 'shop', farm: 'farm', seasons: 'seasons' }[route.active] || 'more';
@@ -176,11 +181,11 @@ export function AppNav({ route }) {
         <Row to="/gallery" icon={<Icon name="m-gallery" />} label="Gallery" sub="Photos from the farm" />
         <Row to="/careers" icon={<Icon name="m-jobs" />} label="Careers" sub="Join the Welkin team" />
         <Row to="/contact" icon={<Icon name="m-mail" />} label="Contact & map" sub="Order, enquire, find us" />
-        <Row href={PHONE_TEL} icon={<Icon name="m-phone" />} label="Call us" sub="70069 01374" />
-        <Row href={INSTAGRAM} icon={<Icon name="ig" />} label="Instagram" sub="@welkinfarmstead" ext />
-        <Row href={FACEBOOK} icon={<Icon name="fb" />} label="Facebook" sub="Welkin Farmstead" ext />
+        <Row href={site.phoneTel} icon={<Icon name="m-phone" />} label="Call us" sub={site.phoneDisplay} />
+        <Row href={site.instagram} icon={<Icon name="ig" />} label="Instagram" sub={`@${(site.instagram.split("/").filter(Boolean).pop() || "").replace(/^@/, "")}`} ext />
+        <Row href={site.facebook} icon={<Icon name="fb" />} label="Facebook" sub={site.name} ext />
       </Sheet>
-      <a className="fab" href={wa(HELLO_MSG)} target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><Icon name="wa" /></a>
+      <a className="fab" href={wa(site.helloMsg)} target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><Icon name="wa" /></a>
     </>
   );
 }

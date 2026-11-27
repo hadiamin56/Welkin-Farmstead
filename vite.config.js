@@ -5,4 +5,6 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: { assetsDir: 'static' },
+  // `npm run dev` + `npm start` (API on :8888) lets the admin work during development.
+  server: { proxy: { '/api': 'http://localhost:8888', '/media': 'http://localhost:8888' } },
 });

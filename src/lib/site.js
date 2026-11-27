@@ -1,13 +1,9 @@
-export const SITE = 'Welkin Farmstead';
-export const WA_NUM = '917006901374';
-export const PHONE_TEL = 'tel:+917006901374';
-export const EMAIL = 'waseemhajini86@gmail.com';
-export const INSTAGRAM = 'https://www.instagram.com/welkinfarmstead/';
-export const FACEBOOK = 'https://www.facebook.com/welkinfarmstead/';
-export const MAPQ = 'Welkin+Farmstead,+Sopore,+Kashmir+193201';
+// WhatsApp number comes from the editable content; the provider calls setWhatsApp() with the current value.
+let NUM = '917006901374';
+export const setWhatsApp = (n) => { if (n) NUM = n; };
 
 /** WhatsApp deep link with a pre-filled message. */
-export const wa = (msg) => `https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`;
+export const wa = (msg) => `https://wa.me/${NUM}?text=${encodeURIComponent(msg)}`;
 
 /** "top:20px;left:-30px" -> { top: '20px', left: '-30px' } (custom properties kept as-is). */
 export function parseStyle(str) {

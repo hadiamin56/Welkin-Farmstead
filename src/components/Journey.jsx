@@ -2,11 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AIcon } from './Svg.jsx';
 import { Img } from './Img.jsx';
 import { Sh } from './Blocks.jsx';
-import { JOURNEY } from '../data/content.js';
+import { useContent } from '../content/ContentContext.jsx';
 
 const DWELL = 6000; // ms each stage stays on screen
-const N = JOURNEY.length;
-const SEG = 100 / (N - 1);
 
 /**
  * Six-stage journey: step buttons, a progress line and swipeable stage cards that advance on their own.
@@ -15,6 +13,13 @@ const SEG = 100 / (N - 1);
  * - With "reduce motion" on, it still advances, but without smooth scrolling.
  */
 export function Journey() {
+  const { home } = useContent();
+  const J = home.journey;
+  const JOURNEY = J.stages;
+  const N = JOURNEY.length;
+  const SEG = 100 / (N - 1);
+  const NRef = useRef(N);
+  NRef.current = N;
   const [cur, setCur] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [visible, setVisible] = useState(false);
@@ -36,7 +41,8 @@ export function Journey() {
   };
 
   const go = useCallback((i) => {
-    const next = (i + N) % N;
+    const n = NRef.current;
+    const next = (i + n) % n;
     setCur(next);
     setNonce((n) => n + 1);
     const s = slidesRef.current;
@@ -68,9 +74,9 @@ export function Journey() {
       if (playing && cur < N - 1) { void tick.offsetWidth; tick.classList.add('run'); }
     }
     if (!playing || !visible || held || document.hidden) return undefined;
-    const t = window.setTimeout(() => go(curRef.current === N - 1 ? 0 : curRef.current + 1), DWELL);
+    const t = window.setTimeout(() => go(curRef.current === NRef.current - 1 ? 0 : curRef.current + 1), DWELL);
     return () => window.clearTimeout(t);
-  }, [cur, playing, visible, held, nonce, go]);
+  }, [cur, playing, visible, held, nonce, go, N, SEG]);
 
   // Pause while the tab is in the background.
   useEffect(() => {
@@ -88,7 +94,7 @@ export function Journey() {
       const st = stride();
       if (!st) return;
       const i = Math.round(slidesRef.current.scrollLeft / st);
-      if (i >= 0 && i < N && i !== curRef.current) setCur(i);
+      if (i >= 0 && i < NRef.current && i !== curRef.current) setCur(i);
       setNonce((n) => n + 1);
     }, 140);
   };
@@ -108,13 +114,13 @@ export function Journey() {
   return (
     <section className="sec journey" id="journey">
       <div className="wrap">
-        <Sh eyebrow="How Welkin grows" title="Six stages, one farm" sub="Follow the journey automatically, or tap any stage." />
+        <Sh eyebrow={J.eyebrow} title={J.title} sub={J.sub} />
         <div className="jt" id="jt" ref={rootRef} onPointerEnter={mouseOnly(() => setHeld(true))} onPointerLeave={mouseOnly(() => setHeld(false))}>
           <div className="jsteps">
-            <span className="jline" aria-hidden="true"><i className="jfill" style={{ width: `${cur * SEG}%` }} /><i className="jtick" ref={tickRef} /></span>
-            <ol>
+            <span className="jline" aria-hidden="true" style={N === 6 ? undefined : { left: `calc(100% / ${N * 2})`, right: `calc(100% / ${N * 2})` }}><i className="jfill" style={{ width: `${cur * SEG}%` }} /><i className="jtick" ref={tickRef} /></span>
+            <ol style={N === 6 ? undefined : { gridTemplateColumns: `repeat(${N}, 1fr)` }}>
               {JOURNEY.map((s, i) => (
-                <li key={s.label}>
+                <li key={`${s.label}${i}`}>
                   <button className={`jn${i === cur ? ' on' : ''}${i < cur ? ' done' : ''}`} type="button" data-i={i} aria-label={`Stage ${i + 1}: ${s.title}`} aria-current={i === cur ? 'step' : 'false'} onClick={() => go(i)}>
                     <AIcon name={s.icon} /><span className="jl">{s.label}</span>
                   </button>
@@ -128,8 +134,8 @@ export function Journey() {
             onTouchStart={() => setHeld(true)} onTouchEnd={() => { setHeld(false); setNonce((n) => n + 1); }} onTouchCancel={() => { setHeld(false); setNonce((n) => n + 1); }}
           >
             {JOURNEY.map((s, i) => (
-              <article key={s.title} className={`jslide${i === cur ? ' act' : ''}`} id={`stage${i + 1}`} aria-label={`Stage ${i + 1} of ${N}`}>
-                <div className="jimg"><Img file={s.file} alt={s.title} sizes="(min-width:980px) 600px, 86vw" /></div>
+              <article key={`${s.title}${i}`} className={`jslide${i === cur ? ' act' : ''}`} id={`stage${i + 1}`} aria-label={`Stage ${i + 1} of ${N}`}>
+                <div className="jimg"><Img file={s.image} alt={s.title} sizes="(min-width:980px) 600px, 86vw" /></div>
                 <div className="jtxt"><span className="stage">{`Stage ${i + 1} of ${N}`}</span><h3>{s.title}</h3><p>{s.text}</p></div>
               </article>
             ))}
