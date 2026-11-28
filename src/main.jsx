@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
+import './design.css';
 import App from './App.jsx';
 
 // Opt in to React Router v7 behaviour now (silences upgrade notices).

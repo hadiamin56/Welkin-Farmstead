@@ -11,6 +11,7 @@
     "start": "node scripts/dev-server.mjs"
   },
   "dependencies": {
+    "@fontsource/fraunces": "^5.3.0",
     "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@netlify/blobs": "^8.2.0",
     "leaflet": "1.9.4",

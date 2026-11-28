@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Sec, Sh, Split, Band, WaButton, Fade } from '../components/Blocks.jsx';
-import { Ph } from '../components/Img.jsx';
-import { DecoWrap } from '../components/Deco.jsx';
+import { Ph, Img } from '../components/Img.jsx';
 import { FindUs } from '../components/FindUs.jsx';
 import { Journey } from '../components/Journey.jsx';
 import { ProductCard, Features, Tiles, Strip, SeasonList, FollowBand } from '../components/Parts.jsx';
-import { HERO_DECO, D } from '../data/content.js';
+import { D } from '../data/content.js';
 import { useContent } from '../content/ContentContext.jsx';
 
 export default function Home() {
@@ -17,7 +16,7 @@ export default function Home() {
     shop: (
       <Sec key="shop">
         <Sh eyebrow={h.shop.eyebrow} title={h.shop.title} sub={h.shop.sub} />
-        <div className="cards">{featured.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+        <div className="cards hl">{featured.map((p) => <ProductCard key={p.id} p={p} />)}</div>
         <p className="more"><Link className="btn btn-ghost" to="/shop">{h.shop.seeAll}</Link></p>
       </Sec>
     ),
@@ -60,22 +59,22 @@ export default function Home() {
   };
   return (
     <>
-      <section className="hero">
-        <DecoWrap items={HERO_DECO}><span className="blob b1" /><span className="blob b2" /></DecoWrap>
-        <div className="wrap hero-in">
+      <section className="hero hero2">
+        <div className="hero-bg"><Img file={h.hero.imageMain} alt={h.hero.capMain} sizes="100vw" eager /></div>
+        <span className="hero-shade" aria-hidden="true" />
+        <div className="wrap hero-in2">
           <div className="hero-copy">
             <p className="pill"><span /> {h.hero.pill}</p>
             <h1>{h.hero.title}</h1>
             <p className="lead">{h.hero.lead}</p>
             <div className="actions">
-              <Link className="btn btn-green" to="/shop">{h.hero.primary}</Link>
-              <WaButton cls="btn btn-ghost" msg={h.hero.secondaryMsg}>{h.hero.secondary}</WaButton>
+              <Link className="btn btn-light" to="/shop">{h.hero.primary}</Link>
+              <WaButton cls="btn btn-glass" msg={h.hero.secondaryMsg}>{h.hero.secondary}</WaButton>
             </div>
           </div>
-          <div className="collage">
-            <Ph file={h.hero.imageMain} alt={h.hero.capMain} cap={h.hero.capMain} cls="a" sizes="(min-width:980px) 520px, 100vw" eager />
-            <Ph file={h.hero.imageB} cap={h.hero.capB} cls="b" sizes="(min-width:980px) 260px, 50vw" />
-            <Ph file={h.hero.imageC} cap={h.hero.capC} cls="c" sizes="(min-width:980px) 260px, 50vw" />
+          <div className="hero-side">
+            <Ph file={h.hero.imageB} cap={h.hero.capB} sizes="220px" />
+            <Ph file={h.hero.imageC} cap={h.hero.capC} sizes="220px" />
           </div>
         </div>
         <Fade className="wrap facts">

@@ -120,6 +120,7 @@ export function Footer() {
             <Social />
           </div>
         </div>
+        <div className="wrap fmark" aria-hidden="true" data-t={site.name.split(' ')[0]} />
         <div className="wrap fcopy">© <span id="yr" suppressHydrationWarning>{new Date().getFullYear()}</span>{` ${site.name} · Managed by ${site.managedBy}`}</div>
       </footer>
     </>
